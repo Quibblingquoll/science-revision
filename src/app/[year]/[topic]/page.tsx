@@ -2,12 +2,20 @@ import { client } from '@/lib/sanity.client';
 
 export const revalidate = 1800;
 
+type RevisionPage = { title: string; slug: string };
+type TopicData = {
+  title: string;
+  term?: number;
+  year?: { title: string; slug: string } | null;
+  pages: RevisionPage[];
+};
+
 export default async function TopicPage({
   params: { year, topic },
 }: {
   params: { year: string; topic: string };
 }) {
-  const data = await client.fetch(
+  const data = await client.fetch<TopicData>(
     `*[_type=="topic" && slug.current==$topic][0]{
       title, term,
       "year": year-> { title, "slug": slug.current },
@@ -27,7 +35,7 @@ export default async function TopicPage({
         {data.year?.title} • {data.term ? `Term ${data.term}` : 'Topic'}
       </p>
       <ul className="space-y-2">
-        {data.pages?.map((p: any) => (
+        {data.pages?.map((p: RevisionPage) => (
           <li key={p.slug}>
             <a className="underline" href={`/${year}/${topic}/${p.slug}`}>
               {p.title}
