@@ -26,6 +26,22 @@ function groupByYear(topics: Topic[]): YearGroup[] {
     .map(([year, topics]) => ({ year, topics }));
 }
 
+// Soft fill colour per year (feel free to tweak)
+function bgForYear(year: string): string {
+  switch (year) {
+    case '7':
+      return 'bg-amber-100'; // warm yellow
+    case '8':
+      return 'bg-lime-100'; // light green
+    case '9':
+      return 'bg-sky-100'; // light blue
+    case '10':
+      return 'bg-violet-100'; // light purple
+    default:
+      return 'bg-neutral-100'; // light grey fallback
+  }
+}
+
 export default async function HomePage() {
   const topics: Topic[] = await client.fetch(TOPICS_WITH_PAGES);
   const years = groupByYear(topics).filter((g) => g.year); // drop empty
@@ -34,41 +50,35 @@ export default async function HomePage() {
     <>
       <SiteHeader />
       <main className="mx-auto max-w-5xl px-4 py-8">
-        {/* <p className="text-neutral-600 mb-6">
-          Pick a year, then a topic, then a lesson page.
-        </p> */}
-
         {!years.length ? (
-          <div className="rounded-xl border p-6 text-neutral-600">
+          <div className="rounded-xl border border-black p-6 text-neutral-700">
             No published content found yet. Add <code>Topic</code> and <code>Content Page</code>{' '}
             docs in Studio and publish them.
           </div>
         ) : (
           <div className="space-y-6">
             {years.map((y) => (
-              // Year section card
-              <section
-                key={y.year}
-                className="rounded-2xl border bg-white/70 backdrop-blur p-4 shadow-sm"
-              >
-                <h2 className="text-xl font-semibold mb-3 text-sky-900">Year {y.year}</h2>
+              <section key={y.year} className="rounded-2xl border border-black bg-neutral-50 p-4">
+                <h2 className="text-xl font-semibold mb-3 text-black">Year {y.year}</h2>
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   {y.topics.map((t) => (
                     <div
                       key={t.slug}
-                      className="rounded-xl border bg-white p-3 shadow-sm transition-colors hover:border-sky-300 hover:shadow-md"
+                      className={`rounded-xl border border-black p-3 shadow-sm transition-transform hover:scale-[1.01] ${bgForYear(
+                        String(y.year)
+                      )}`}
                     >
-                      {/* Topic title = link */}
-                      <h3 className="font-medium mb-2">
+                      {/* Topic title = link (black text, underline) */}
+                      <h3 className="font-medium mb-2 text-black">
                         <Link
                           href={`/${y.year}/${t.slug}`}
-                          className="text-sky-700 hover:text-sky-900 underline underline-offset-2"
+                          className="underline underline-offset-2 hover:no-underline"
                         >
                           {t.title}
                         </Link>
                         {typeof t.term === 'number' && (
-                          <span className="ml-2 inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-700">
+                          <span className="ml-2 inline-flex items-center rounded-full border border-black/20 bg-white/60 px-2 py-0.5 text-xs font-medium text-black">
                             Term {t.term}
                           </span>
                         )}
@@ -80,7 +90,7 @@ export default async function HomePage() {
                           t.pages.map((p) => (
                             <li key={p.slug}>
                               <Link
-                                className="block rounded-lg px-2 py-1 transition-colors hover:bg-sky-50"
+                                className="block rounded-lg px-2 py-1 hover:bg-black/5"
                                 href={`/${y.year}/${t.slug}/${p.slug}`}
                               >
                                 {p.title}
@@ -88,7 +98,7 @@ export default async function HomePage() {
                             </li>
                           ))
                         ) : (
-                          <li className="text-sm text-neutral-500">No pages yet</li>
+                          <li className="text-sm text-neutral-700">No pages yet</li>
                         )}
                       </ul>
                     </div>
@@ -100,7 +110,7 @@ export default async function HomePage() {
         )}
       </main>
 
-      <footer className="mt-10 py-10 text-center text-xs text-neutral-500">
+      <footer className="mt-10 py-10 text-center text-xs text-neutral-600">
         © {new Date().getFullYear()} Science-Revision
       </footer>
     </>
