@@ -60,11 +60,30 @@ export default defineType({
       of: [{ type: 'block' }],
     }),
 
+    // inside fields: [...]
     defineField({
       name: 'content',
       title: 'Content',
       type: 'array',
-      of: [{ type: 'block' }, { type: 'figure' }, { type: 'callout' }],
+      of: [
+        { type: 'block' },
+        { type: 'figure' },
+        {
+          type: 'image', // 👈 image type
+          title: 'Image',
+          options: { hotspot: true }, // 👈 correct place for hotspot
+          fields: [
+            {
+              name: 'alt',
+              type: 'string',
+              title: 'Alt text',
+              description: 'Short description for accessibility',
+              validation: (Rule) => Rule.required(),
+            },
+          ],
+        },
+        { type: 'callout' },
+      ],
     }),
 
     defineField({

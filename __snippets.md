@@ -4,6 +4,6 @@
 ```bash
 git status
 git add -A
-git commit -m "next.js updated"
+git commit -m "updated sanity images I think"
 git push origin main
 
