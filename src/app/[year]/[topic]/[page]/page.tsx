@@ -2,15 +2,15 @@ import { client } from '@/lib/sanity.client';
 import { PortableText, type PortableTextComponents } from '@portabletext/react';
 import Image from 'next/image';
 import { urlFor } from '@/lib/sanity.image';
-import PrevNextNav from '@/components/PrevNextNav'; // ✅ new import
+import PrevNextNav from '@/components/PrevNextNav';
 
 export const revalidate = 300;
 
 type RouteParams = { year: string; topic: string; page: string };
 
-// --------------------------------------
-// Portable Text renderers (image + figure)
-// --------------------------------------
+/* --------------------------------------
+   Portable Text renderers (image + figure)
+-------------------------------------- */
 const components: PortableTextComponents = {
   types: {
     image: ({ value }) => {
@@ -58,33 +58,27 @@ const components: PortableTextComponents = {
   },
 };
 
-// --------------------------------------
-// Page component
-// --------------------------------------
+/* --------------------------------------
+   Page component
+-------------------------------------- */
 export default async function ContentPage({ params }: { params: Promise<RouteParams> }) {
-  const { topic, page } = await params;
+  // ⬇️ include year so we can build the prev/next hrefs correctly
+  const { year, topic, page } = await params;
 
-  // Fetch current page data
   const data = await client.fetch(
     `*[_type=="contentPage" && slug.current==$page][0]{
       title,
-      content[] {
+      content[]{
         ...,
         _type == "image" => {
           ...,
-          asset->{
-            _id,
-            metadata{ lqip }
-          }
+          asset->{ _id, metadata{ lqip } }
         },
         _type == "figure" => {
           ...,
-          image {
+          image{
             ...,
-            asset->{
-              _id,
-              metadata{ lqip }
-            }
+            asset->{ _id, metadata{ lqip } }
           }
         }
       }
@@ -105,7 +99,7 @@ export default async function ContentPage({ params }: { params: Promise<RoutePar
       </article>
 
       {/* 🧭 Previous / Next navigation */}
-      <PrevNextNav topicSlug={topic} pageSlug={page} />
+      <PrevNextNav year={year} topicSlug={topic} pageSlug={page} />
     </main>
   );
 }
