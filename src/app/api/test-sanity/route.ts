@@ -2,7 +2,17 @@ import { NextResponse } from 'next/server';
 import { client } from '@/lib/sanity.client';
 
 export async function GET() {
-  const query = `*[_type == "subject"][0...5]{_id, title}`;
-  const data = await client.fetch(query);
-  return NextResponse.json(data);
+  const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
+  const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET;
+
+  if (!projectId || !dataset) {
+    return NextResponse.json(
+      { ok: false, reason: 'Missing envs', projectId, dataset },
+      { status: 500 }
+    );
+  }
+
+  // simple ping query
+  const topics = await client.fetch<number>(`count(*[_type == "topic"])`);
+  return NextResponse.json({ ok: true, projectId, dataset, topics });
 }
