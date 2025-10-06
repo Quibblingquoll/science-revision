@@ -2,20 +2,33 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Fragment } from 'react';
-import type { Route } from 'next'; // ← key line
+import { Fragment, useEffect } from 'react';
+import type { Route } from 'next';
 
 export default function Breadcrumbs() {
   const pathname = usePathname() || '/';
 
+  useEffect(() => {
+    // Debug: check what Next thinks the current path is
+    // eslint-disable-next-line no-console
+    console.log('[Breadcrumbs] pathname:', pathname);
+  }, [pathname]);
+
   const segments = pathname.split('/').filter(Boolean);
-  if (segments.length === 0) return null;
 
   const formatSegment = (seg: string) =>
-    seg.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+    decodeURIComponent(seg)
+      .replace(/-/g, ' ')
+      .replace(/\b\w/g, (l) => l.toUpperCase());
+
+  // Build hrefs progressively
+  const buildHref = (idx: number) => `/${segments.slice(0, idx + 1).join('/')}` as Route;
 
   return (
-    <nav aria-label="Breadcrumb" className="text-sm text-gray-600 my-4">
+    <nav
+      aria-label="Breadcrumb"
+      className="text-sm text-gray-700 my-4 border border-dashed rounded-md p-2"
+    >
       <ol className="flex flex-wrap items-center gap-1">
         <li>
           <Link href="/" className="hover:underline text-blue-600">
@@ -24,20 +37,17 @@ export default function Breadcrumbs() {
         </li>
 
         {segments.map((seg, idx) => {
-          const href = `/${segments.slice(0, idx + 1).join('/')}` as Route; // ← cast
+          const href = buildHref(idx);
           const isLast = idx === segments.length - 1;
-
           return (
             <Fragment key={idx}>
               <span className="text-gray-400 mx-1">›</span>
               <li>
                 {isLast ? (
-                  <span className="font-semibold text-gray-800">
-                    {formatSegment(decodeURIComponent(seg))}
-                  </span>
+                  <span className="font-semibold text-gray-900">{formatSegment(seg)}</span>
                 ) : (
                   <Link href={href} className="hover:underline text-blue-600">
-                    {formatSegment(decodeURIComponent(seg))}
+                    {formatSegment(seg)}
                   </Link>
                 )}
               </li>
