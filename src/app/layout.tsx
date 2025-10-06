@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import Breadcrumbs from '@/components/Breadcrumbs';
-import SiteHeader from '@/components/SiteHeader';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -28,7 +27,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       >
         <div className="max-w-5xl mx-auto px-4 py-6 bg-white/70 backdrop-blur-md rounded-2xl shadow-sm">
           {/* Branding on every page */}
-          <SiteHeader />
 
           {/* Breadcrumbs on every page */}
           <div className="mt-4">
