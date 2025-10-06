@@ -25,10 +25,7 @@ export default function Breadcrumbs() {
   const buildHref = (idx: number) => `/${segments.slice(0, idx + 1).join('/')}` as Route;
 
   return (
-    <nav
-      aria-label="Breadcrumb"
-      className="text-sm text-gray-700 my-4 border border-dashed rounded-md p-2"
-    >
+    <nav aria-label="Breadcrumb" className="text-sm text-gray-700 my-4">
       <ol className="flex flex-wrap items-center gap-1">
         <li>
           <Link href="/" className="hover:underline text-blue-600">
