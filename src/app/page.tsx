@@ -27,7 +27,7 @@ export default async function HomePage() {
     <>
       <SiteHeader />
       <main className="mx-auto max-w-5xl px-4 py-8">
-        <p className="text-neutral-600 mb-6">Pick a year, then a topic, then a lesson page.</p>
+        {/* <p className="text-neutral-600 mb-6">Pick a year, then a topic, then a lesson page.</p>*/}
 
         {!years.length ? (
           <div className="rounded-xl border p-6 text-neutral-600">

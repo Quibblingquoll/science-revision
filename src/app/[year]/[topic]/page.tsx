@@ -2,12 +2,12 @@ import { client } from '@/lib/sanity.client';
 
 export const revalidate = 1800;
 
-type RevisionPage = { title: string; slug: string };
+type ContentPage = { title: string; slug: string };
 type TopicData = {
   title: string;
   term?: number;
   year?: number | string;
-  pages: RevisionPage[];
+  pages: ContentPage[];
 };
 
 export default async function TopicPage({

@@ -3,7 +3,7 @@ import { PortableText } from '@portabletext/react';
 
 export const revalidate = 1800;
 
-export default async function RevisionPage({
+export default async function ContentPage({
   params,
 }: {
   params: Promise<{ year: string; topic: string; page: string }>;
