@@ -35,8 +35,7 @@ export default async function HomePage() {
       <main className="mx-auto max-w-5xl px-4 py-8">
         {!years.length ? (
           <div className="rounded-xl border border-black p-6 text-neutral-700">
-            No published content found yet. Add <code>Topic</code> and <code>Content Page</code>{' '}
-            docs in Studio and publish them.
+            No published content found yet. Add <code>Topic</code> and <code>Content Page</code> docs in Studio and publish them.
           </div>
         ) : (
           <YearTopicAccordions years={years} />
