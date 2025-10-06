@@ -4,6 +4,6 @@
 ```bash
 git status
 git add -A
-git commit -m "updated sanity images I think"
+git commit -m "update of stuff"
 git push origin main
 
