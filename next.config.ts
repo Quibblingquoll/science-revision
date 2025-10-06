@@ -7,7 +7,12 @@ const nextConfig: NextConfig = {
 
   // Allow Next.js Image component to load Sanity-hosted images
   images: {
-    domains: ['cdn.sanity.io'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.sanity.io',
+      },
+    ],
   },
 
   // Optional: enable modern app directory features
