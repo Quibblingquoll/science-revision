@@ -46,31 +46,41 @@ export default async function HomePage() {
         ) : (
           <div className="space-y-6">
             {years.map((y) => (
-              <section key={y.year} className="rounded-2xl border p-4">
-                <h2 className="text-xl font-semibold mb-3">Year {y.year}</h2>
+              // Year section card
+              <section
+                key={y.year}
+                className="rounded-2xl border bg-white/70 backdrop-blur p-4 shadow-sm"
+              >
+                <h2 className="text-xl font-semibold mb-3 text-sky-900">Year {y.year}</h2>
+
                 <div className="grid sm:grid-cols-2 gap-4">
                   {y.topics.map((t) => (
-                    <div key={t.slug} className="rounded-xl border p-3">
-                      {/* Topic title is now the link */}
+                    <div
+                      key={t.slug}
+                      className="rounded-xl border bg-white p-3 shadow-sm transition-colors hover:border-sky-300 hover:shadow-md"
+                    >
+                      {/* Topic title = link */}
                       <h3 className="font-medium mb-2">
                         <Link
                           href={`/${y.year}/${t.slug}`}
-                          className="underline underline-offset-2 hover:no-underline"
+                          className="text-sky-700 hover:text-sky-900 underline underline-offset-2"
                         >
                           {t.title}
                         </Link>
                         {typeof t.term === 'number' && (
-                          <span className="text-sm text-neutral-500 ml-2">(Term {t.term})</span>
+                          <span className="ml-2 inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-700">
+                            Term {t.term}
+                          </span>
                         )}
                       </h3>
 
-                      {/* List of content pages */}
+                      {/* Pages list */}
                       <ul className="space-y-1">
                         {t.pages.length ? (
                           t.pages.map((p) => (
                             <li key={p.slug}>
                               <Link
-                                className="block rounded-lg px-2 py-1 hover:bg-neutral-50"
+                                className="block rounded-lg px-2 py-1 transition-colors hover:bg-sky-50"
                                 href={`/${y.year}/${t.slug}/${p.slug}`}
                               >
                                 {p.title}

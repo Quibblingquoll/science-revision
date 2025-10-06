@@ -4,6 +4,6 @@
 ```bash
 git status
 git add -A
-git commit -m "removed topic link text"
+git commit -m "added some colour"
 git push origin main
 
