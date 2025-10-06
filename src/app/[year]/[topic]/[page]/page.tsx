@@ -1,4 +1,3 @@
-// src/app/[year]/[topic]/[page]/page.tsx
 import { client } from '@/lib/sanity.client';
 import { PortableText, type PortableTextComponents } from '@portabletext/react';
 import Image from 'next/image';
@@ -8,11 +7,10 @@ export const revalidate = 300;
 
 type RouteParams = { year: string; topic: string; page: string };
 
-// Portable Text renderers (handles both plain image blocks and custom figure objects)
+// Portable Text renderers (image + optional custom figure)
 const components: PortableTextComponents = {
   types: {
     image: ({ value }) => {
-      // value is the whole Sanity image object
       const src = urlFor(value).width(1200).fit('max').url();
       if (!src) return null;
       return (
@@ -33,7 +31,6 @@ const components: PortableTextComponents = {
         </figure>
       );
     },
-    // If you also use a custom object: {_type:'figure', image:{...}, caption:...}
     figure: ({ value }) => {
       const src = urlFor(value?.image).width(1200).fit('max').url();
       if (!src) return null;
@@ -61,11 +58,10 @@ const components: PortableTextComponents = {
 export default async function ContentPage({
   params,
 }: {
-  params: RouteParams; // <- not a Promise
+  params: Promise<RouteParams>; // <-- keep as Promise to satisfy your project's PageProps
 }) {
-  const { page } = params;
+  const { page } = await params;
 
-  // Bring back LQIP for blur and ensure image blocks are fully expanded
   const data = await client.fetch(
     `*[_type=="contentPage" && slug.current==$page][0]{
       title,
