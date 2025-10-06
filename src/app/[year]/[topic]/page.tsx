@@ -1,4 +1,4 @@
-import { client } from "@/lib/sanity.client";
+import { client } from '@/lib/sanity.client';
 
 export const revalidate = 1800;
 
@@ -6,7 +6,7 @@ type RevisionPage = { title: string; slug: string };
 type TopicData = {
   title: string;
   term?: number;
-  year?: { title: string; slug: string } | null;
+  year?: number | string;
   pages: RevisionPage[];
 };
 
@@ -15,16 +15,13 @@ export default async function TopicPage({
 }: {
   params: Promise<{ year: string; topic: string }>;
 }) {
-  const { year, topic } = await params; // 👈 await the params
+  const { year, topic } = await params;
 
   const data = await client.fetch<TopicData>(
     `*[_type=="topic" && slug.current==$topic][0]{
-      title, term,
-      "year": year->{ title, "slug": slug.current },
-      "pages": *[_type=="revisionPage" && references(^._id)]
-        | order(coalesce(order,999), title asc){
-          title, "slug": slug.current
-        }
+      title, term, year,
+      "pages": *[_type=="contentPage" && references(^._id)]
+        | order(coalesce(order,999), title asc){ title, "slug": slug.current }
     }`,
     { topic }
   );
@@ -35,7 +32,7 @@ export default async function TopicPage({
     <main className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="text-3xl font-bold mb-2">{data.title}</h1>
       <p className="text-neutral-600 mb-6">
-        {data.year?.title} • {data.term ? `Term ${data.term}` : "Topic"}
+        Year {data.year ?? year} • {data.term ? `Term ${data.term}` : 'Topic'}
       </p>
       <ul className="space-y-2">
         {data.pages?.map((p) => (

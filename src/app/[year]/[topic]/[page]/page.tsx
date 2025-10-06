@@ -8,10 +8,10 @@ export default async function RevisionPage({
 }: {
   params: Promise<{ year: string; topic: string; page: string }>;
 }) {
-  const { page } = await params; // 👈 await the params
+  const { page } = await params;
 
   const data = await client.fetch(
-    `*[_type=="revisionPage" && slug.current==$page][0]{ title, content }`,
+    `*[_type=="contentPage" && slug.current==$page][0]{ title, content }`,
     { page }
   );
 

@@ -1,11 +1,14 @@
-export const MENU_QUERY = /* groq */ `
-*[_type == "year"]|order(title asc){
-  title, "slug": slug.current,
-  "topics": *[_type=="topic" && references(^._id)]|order(term asc, title asc){
-    title, term, "slug": slug.current,
-    "pages": *[_type=="revisionPage" && references(^._id)]|order(coalesce(order, 999), title asc){
-      title, "slug": slug.current
+// topics + their content pages (your schema names)
+export const TOPICS_WITH_PAGES = /* groq */ `
+*[_type == "topic"] | order(year asc, term asc, title asc){
+  title,
+  "slug": slug.current,
+  year,            // number or string (Year 7..10)
+  term,
+  "pages": *[_type=="contentPage" && references(^._id)]
+    | order(coalesce(order, 999), title asc){
+      title,
+      "slug": slug.current
     }
-  }
 }
 `;
