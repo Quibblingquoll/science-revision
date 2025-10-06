@@ -11,6 +11,7 @@
     "@sanity/icons": "^3.7.4",
     "@sanity/image-url": "^1.2.0",
     "@sanity/vision": "^4.10.2",
+    "clsx": "^2.1.1",
     "sanity": "^4.10.2",
     "styled-components": "^6.1.19"
   }
