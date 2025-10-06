@@ -4,6 +4,6 @@
 ```bash
 git status
 git add -A
-git commit -m "changed revalidate times for Sanity"
+git commit -m "removed topic link text"
 git push origin main
 
