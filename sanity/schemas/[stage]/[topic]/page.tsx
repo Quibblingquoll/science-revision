@@ -9,7 +9,7 @@ type PageProps = {
 
 export default async function Page({ params: { stage, topic } }: PageProps) {
   const data = await client.fetch(
-    `*[_type == "revisionPage"
+    `*[_type == "contentPage"
         && defined(topic->slug.current)
         && topic->slug.current == $topic
         && defined(topic->stage->slug.current)
