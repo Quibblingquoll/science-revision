@@ -4,6 +4,6 @@
 ```bash
 git status
 git add -A
-git commit -m "added some colour"
+git commit -m "next.js updated"
 git push origin main
 
