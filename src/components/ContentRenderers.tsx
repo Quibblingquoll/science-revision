@@ -5,13 +5,24 @@ import { motion, type Variants } from 'framer-motion';
 import Image from 'next/image';
 import clsx from 'clsx';
 import { urlFor } from '@/lib/sanity.image';
-import type { SanityImageSource } from '@sanity/image-url';
 
 /* ---------------------------------- */
 /* Types shared by our renderers      */
 /* ---------------------------------- */
 
 type MaxWidth = 'narrow' | 'wide' | 'full';
+
+// Local fallback type until Sanity re-exports it
+type SanityImageSource = {
+  _type?: string;
+  asset?: {
+    _ref?: string;
+    _type?: string;
+    metadata?: {
+      lqip?: string;
+    };
+  };
+};
 
 interface FigureImage extends SanityImageSource {
   alt?: string;
