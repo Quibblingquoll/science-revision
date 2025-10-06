@@ -1,8 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-
-
-import { client } from '@/lib/sanity.client';
+import { client } from "@/lib/sanity.client";
 
 export const revalidate = 1800;
 
@@ -15,17 +11,20 @@ type TopicData = {
 };
 
 export default async function TopicPage({
-  params: { year, topic },
+  params,
 }: {
-  params: { year: string; topic: string };
+  params: Promise<{ year: string; topic: string }>;
 }) {
+  const { year, topic } = await params; // 👈 await the params
+
   const data = await client.fetch<TopicData>(
     `*[_type=="topic" && slug.current==$topic][0]{
       title, term,
-      "year": year-> { title, "slug": slug.current },
-      "pages": *[_type=="revisionPage" && references(^._id)]|order(coalesce(order,999), title asc){
-        title, "slug": slug.current
-      }
+      "year": year->{ title, "slug": slug.current },
+      "pages": *[_type=="revisionPage" && references(^._id)]
+        | order(coalesce(order,999), title asc){
+          title, "slug": slug.current
+        }
     }`,
     { topic }
   );
@@ -36,10 +35,10 @@ export default async function TopicPage({
     <main className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="text-3xl font-bold mb-2">{data.title}</h1>
       <p className="text-neutral-600 mb-6">
-        {data.year?.title} • {data.term ? `Term ${data.term}` : 'Topic'}
+        {data.year?.title} • {data.term ? `Term ${data.term}` : "Topic"}
       </p>
       <ul className="space-y-2">
-        {data.pages?.map((p: RevisionPage) => (
+        {data.pages?.map((p) => (
           <li key={p.slug}>
             <a className="underline" href={`/${year}/${topic}/${p.slug}`}>
               {p.title}

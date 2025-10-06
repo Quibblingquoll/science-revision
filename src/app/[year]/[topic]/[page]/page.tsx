@@ -4,14 +4,14 @@ import { PortableText } from '@portabletext/react';
 export const revalidate = 1800;
 
 export default async function RevisionPage({
-  params: { page },
+  params,
 }: {
-  params: { year: string; topic: string; page: string };
+  params: Promise<{ year: string; topic: string; page: string }>;
 }) {
+  const { page } = await params; // 👈 await the params
+
   const data = await client.fetch(
-    `*[_type=="revisionPage" && slug.current==$page][0]{
-      title, content
-    }`,
+    `*[_type=="revisionPage" && slug.current==$page][0]{ title, content }`,
     { page }
   );
 
