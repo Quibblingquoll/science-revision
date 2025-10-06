@@ -2,12 +2,15 @@ import { client } from '@/lib/sanity.client';
 import { PortableText, type PortableTextComponents } from '@portabletext/react';
 import Image from 'next/image';
 import { urlFor } from '@/lib/sanity.image';
+import PrevNextNav from '@/components/PrevNextNav'; // ✅ new import
 
 export const revalidate = 300;
 
 type RouteParams = { year: string; topic: string; page: string };
 
-// Portable Text renderers (image + optional custom figure)
+// --------------------------------------
+// Portable Text renderers (image + figure)
+// --------------------------------------
 const components: PortableTextComponents = {
   types: {
     image: ({ value }) => {
@@ -55,17 +58,17 @@ const components: PortableTextComponents = {
   },
 };
 
-export default async function ContentPage({
-  params,
-}: {
-  params: Promise<RouteParams>; // <-- keep as Promise to satisfy your project's PageProps
-}) {
-  const { page } = await params;
+// --------------------------------------
+// Page component
+// --------------------------------------
+export default async function ContentPage({ params }: { params: Promise<RouteParams> }) {
+  const { topic, page } = await params;
 
+  // Fetch current page data
   const data = await client.fetch(
     `*[_type=="contentPage" && slug.current==$page][0]{
       title,
-      content[]{
+      content[] {
         ...,
         _type == "image" => {
           ...,
@@ -76,7 +79,7 @@ export default async function ContentPage({
         },
         _type == "figure" => {
           ...,
-          image{
+          image {
             ...,
             asset->{
               _id,
@@ -89,14 +92,20 @@ export default async function ContentPage({
     { page }
   );
 
-  if (!data) return <div className="mx-auto max-w-3xl p-6">Not found</div>;
+  if (!data) {
+    return <div className="mx-auto max-w-3xl p-6 text-neutral-700">Not found</div>;
+  }
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="text-3xl font-bold mb-4">{data.title}</h1>
+
       <article className="prose prose-neutral max-w-none">
         <PortableText value={data.content} components={components} />
       </article>
+
+      {/* 🧭 Previous / Next navigation */}
+      <PrevNextNav topicSlug={topic} pageSlug={page} />
     </main>
   );
 }
