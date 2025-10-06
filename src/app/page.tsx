@@ -2,7 +2,7 @@ import { client } from '@/lib/sanity.client';
 import { TOPICS_WITH_PAGES } from '@/lib/groq';
 import SiteHeader from '@/components/SiteHeader';
 
-export const revalidate = 1800;
+export const revalidate = 300;
 
 type Page = { title: string; slug: string };
 type Topic = { title: string; slug: string; year: number | string; term?: number; pages: Page[] };

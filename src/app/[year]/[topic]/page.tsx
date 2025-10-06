@@ -1,6 +1,6 @@
 import { client } from '@/lib/sanity.client';
 
-export const revalidate = 1800;
+export const revalidate = 300;
 
 type ContentPage = { title: string; slug: string };
 type TopicData = {

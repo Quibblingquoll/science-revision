@@ -1,7 +1,7 @@
 import { client } from '@/lib/sanity.client';
 import { PortableText } from '@portabletext/react';
 
-export const revalidate = 1800;
+export const revalidate = 300;
 
 export default async function ContentPage({
   params,

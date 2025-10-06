@@ -1,7 +1,7 @@
 import { client } from '@/lib/sanity.client';
 import { PortableText } from '@portabletext/react';
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 type PageProps = {
   params: { stage: string; topic: string };
