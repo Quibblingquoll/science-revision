@@ -2,9 +2,6 @@
 import imageUrlBuilder from '@sanity/image-url';
 import { client } from './sanity.client';
 
-/**
- * Minimal local definition matching Sanity image objects.
- */
 export interface SanityImageSource {
   _type?: string;
   asset?: {
@@ -25,21 +22,16 @@ export interface SanityImageSource {
     height?: number;
     width?: number;
   };
-  [key: string]: unknown;
+  // ⛔️ removed the index signature to avoid assignability errors
 }
 
 const builder = imageUrlBuilder(client);
 
-/**
- * Type-safe helper to build Sanity image URLs.
- */
 export function urlFor(source: SanityImageSource) {
-  // The builder API accepts anything shaped like a Sanity image object,
-  // so we can safely widen the type using a generic constraint.
+  // keep this cast to avoid `any` while satisfying the builder API
   return builder.image(source as Record<string, unknown>);
 }
 
-/** Optional guard for runtime use */
 export function hasImageAsset(
   src: SanityImageSource | null | undefined
 ): src is SanityImageSource & { asset: { _ref?: string; _id?: string } } {
