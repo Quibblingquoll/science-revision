@@ -1,11 +1,8 @@
-// next.config.ts
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
 
-  // Allow Next.js Image component to load Sanity-hosted images
   images: {
     remotePatterns: [
       {
@@ -15,12 +12,9 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // Optional: enable modern app directory features
-  experimental: {
-    typedRoutes: true,
-  },
+  // You can safely re-enable this later once the build is clean:
+  // experimental: { typedRoutes: true },
 
-  // Optional: redirect old paths
   async redirects() {
     return [
       {
