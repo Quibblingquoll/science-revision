@@ -1,8 +1,10 @@
+// /app/(routes)/year/[year]/[topic]/[page]/page.tsx
 import { client } from '@/lib/sanity.client';
 import { PortableText, type PortableTextComponents } from '@portabletext/react';
 import Image from 'next/image';
 import { urlFor } from '@/lib/sanity.image';
 import PrevNextNav from '@/components/PrevNextNav';
+import ClozeSection from '@/components/ClozeSection';
 
 export const revalidate = 300;
 
@@ -59,6 +61,15 @@ const components: PortableTextComponents = {
 };
 
 /* --------------------------------------
+   (Temporary) auth/session stub
+   Replace with Clerk/Supabase/NextAuth later
+-------------------------------------- */
+async function getSession() {
+  // TODO: plug in real auth; flip for local testing
+  return { isSubscriber: false };
+}
+
+/* --------------------------------------
    Page component
 -------------------------------------- */
 export default async function ContentPage({ params }: { params: RouteParams }) {
@@ -80,6 +91,13 @@ export default async function ContentPage({ params }: { params: RouteParams }) {
             asset->{ _id, metadata{ lqip } }
           }
         }
+      },
+      // 👇 exercises block for Cloze + PDFs
+      exercises{
+        cloze,
+        wordBank,
+        clozePdf{asset->{url, originalFilename, size, mimeType}},
+        answersPdf{asset->{url, originalFilename, size, mimeType}}
       }
     }`,
     { page }
@@ -89,6 +107,12 @@ export default async function ContentPage({ params }: { params: RouteParams }) {
     return <div className="mx-auto max-w-3xl p-6 text-neutral-700">Not found</div>;
   }
 
+  const session = await getSession();
+  const cloze = data?.exercises?.cloze as string | undefined;
+  const wordBank = (data?.exercises?.wordBank as string[] | undefined) ?? [];
+  const clozeUrl = data?.exercises?.clozePdf?.asset?.url as string | undefined;
+  const answersUrl = data?.exercises?.answersPdf?.asset?.url as string | undefined;
+
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="text-3xl font-bold mb-4">{data.title}</h1>
@@ -96,6 +120,16 @@ export default async function ContentPage({ params }: { params: RouteParams }) {
       <article className="prose prose-neutral max-w-none">
         <PortableText value={data.content} components={components} />
       </article>
+
+      {/* Cloze section (with gated Answers download) */}
+      <ClozeSection
+        passage={cloze}
+        wordBank={wordBank}
+        clozeUrl={clozeUrl ?? null}
+        answersUrl={answersUrl ?? null}
+        isSubscriber={session.isSubscriber}
+        title="Cloze Activity"
+      />
 
       <PrevNextNav year={year} topicSlug={topic} pageSlug={page} />
     </main>

@@ -1,6 +1,6 @@
 // /src/lib/groq.ts
 
-// Topics + their content pages (with optional crossword blocks)
+// Topics + their content pages (with optional crossword blocks + cloze/answers PDFs)
 export const TOPICS_WITH_PAGES = /* groq */ `
 *[_type == "topic"] | order(year asc, term asc, title asc) {
   title,
@@ -14,11 +14,18 @@ export const TOPICS_WITH_PAGES = /* groq */ `
       title,
       "slug": slug.current,
       order,
-      // optional: short preview for topic menus
       summary,
 
-      // ✅ Fetch crossword blocks (optional, only if present)
-      content[]{
+      // ✅ Exercises: cloze + word bank + PDFs
+      exercises{
+        cloze,
+        wordBank,
+        clozePdf{asset->{url, originalFilename, size, mimeType}},
+        answersPdf{asset->{url, originalFilename, size, mimeType}}
+      },
+
+      // ✅ Optional crossword blocks (if present in content array)
+      content[] {
         ...,
         _type == "crosswordIpuz" => {
           _type,
