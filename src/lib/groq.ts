@@ -1,14 +1,32 @@
-// topics + their content pages (your schema names)
+// /src/lib/groq.ts
+
+// Topics + their content pages (with optional crossword blocks)
 export const TOPICS_WITH_PAGES = /* groq */ `
-*[_type == "topic"] | order(year asc, term asc, title asc){
+*[_type == "topic"] | order(year asc, term asc, title asc) {
   title,
   "slug": slug.current,
-  year,            // number or string (Year 7..10)
+  year,
   term,
-  "pages": *[_type=="contentPage" && references(^._id)]
-    | order(coalesce(order, 999), title asc){
+
+  // Nested pages belonging to this topic
+  "pages": *[_type == "contentPage" && references(^._id)]
+    | order(coalesce(order, 999), title asc) {
       title,
-      "slug": slug.current
+      "slug": slug.current,
+      order,
+      // optional: short preview for topic menus
+      summary,
+
+      // ✅ Fetch crossword blocks (optional, only if present)
+      content[]{
+        ...,
+        _type == "crosswordIpuz" => {
+          _type,
+          title,
+          "slug": slug.current,
+          ipuz
+        }
+      }
     }
 }
 `;

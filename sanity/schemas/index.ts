@@ -5,7 +5,10 @@ import contentPage from './contentPage';
 import outcome from './outcome';
 import youtube from './objects/youtube';
 import callout from './objects/callout';
-import figure from './objects/figure'; // 👈 add this line for your new figure schema
+import figure from './objects/figure';
+
+// 👇 ADD THIS
+import crosswordIpuz from './objects/crosswordIpuz';
 
 export const schemaTypes = [
   topic,
@@ -13,5 +16,8 @@ export const schemaTypes = [
   outcome,
   youtube,
   callout,
-  figure, // 👈 include new object schema
+  figure,
+
+  // 👇 ADD THIS
+  crosswordIpuz,
 ];

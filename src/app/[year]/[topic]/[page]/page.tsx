@@ -3,15 +3,16 @@ import { PortableText, type PortableTextComponents } from '@portabletext/react';
 import Image from 'next/image';
 import { urlFor } from '@/lib/sanity.image';
 import PrevNextNav from '@/components/PrevNextNav';
+import CrosswordIpuzBlock from '@/components/CrosswordIpuzBlock';
 
 export const revalidate = 300;
 
 type RouteParams = { year: string; topic: string; page: string };
 
 /* --------------------------------------
-   Portable Text renderers (image + figure)
+   Portable Text renderers (image + figure + crossword)
 -------------------------------------- */
-const components: PortableTextComponents = {
+const components = (pageSlug: string): PortableTextComponents => ({
   types: {
     image: ({ value }) => {
       const src = urlFor(value).width(1200).fit('max').url();
@@ -55,21 +56,24 @@ const components: PortableTextComponents = {
         </figure>
       );
     },
+    // ✅ crossword block
+    crosswordIpuz: ({ value }) => <CrosswordIpuzBlock value={value} pageSlug={pageSlug} />,
   },
-};
+});
 
 /* --------------------------------------
    Page component
 -------------------------------------- */
-export default async function ContentPage({ params }: { params: Promise<RouteParams> }) {
-  // ⬇️ include year so we can build the prev/next hrefs correctly
-  const { year, topic, page } = await params;
+export default async function ContentPage({ params }: { params: RouteParams }) {
+  const { year, topic, page } = params;
 
   const data = await client.fetch(
     `*[_type=="contentPage" && slug.current==$page][0]{
       title,
+      slug,
       content[]{
         ...,
+        // images
         _type == "image" => {
           ...,
           asset->{ _id, metadata{ lqip } }
@@ -80,6 +84,10 @@ export default async function ContentPage({ params }: { params: Promise<RoutePar
             ...,
             asset->{ _id, metadata{ lqip } }
           }
+        },
+        // ✅ crossword
+        _type == "crosswordIpuz" => {
+          _type, title, slug, ipuz
         }
       }
     }`,
@@ -95,10 +103,9 @@ export default async function ContentPage({ params }: { params: Promise<RoutePar
       <h1 className="text-3xl font-bold mb-4">{data.title}</h1>
 
       <article className="prose prose-neutral max-w-none">
-        <PortableText value={data.content} components={components} />
+        <PortableText value={data.content} components={components(page)} />
       </article>
 
-      {/* 🧭 Previous / Next navigation */}
       <PrevNextNav year={year} topicSlug={topic} pageSlug={page} />
     </main>
   );
