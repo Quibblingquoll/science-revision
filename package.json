@@ -13,6 +13,7 @@
     "studio": "npx sanity@latest dev --cwd sanity"
   },
   "dependencies": {
+    "@jaredreisinger/react-crossword": "^5.2.0",
     "@portabletext/react": "^4.0.3",
     "@sanity/icons": "^3.7.4",
     "@sanity/image-url": "^1.2.0",
