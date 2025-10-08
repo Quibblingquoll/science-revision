@@ -8,7 +8,7 @@ import callout from './objects/callout';
 import figure from './objects/figure';
 
 // 👇 ADD THIS
-//import crosswordIpuz from './objects/crosswordIpuz';
+import crosswordIpuz from './objects/crosswordIpuz';
 
 export const schemaTypes = [
   topic,
@@ -19,5 +19,5 @@ export const schemaTypes = [
   figure,
 
   // 👇 ADD THIS
-  // crosswordIpuz,
+  crosswordIpuz,
 ];

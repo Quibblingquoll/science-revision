@@ -5,7 +5,6 @@ export default defineType({
   name: 'crosswordIpuz',
   title: 'Crossword (IPUZ)',
   type: 'object',
-  hidden: true, // 👈 hides from the Studio UI
   fields: [
     defineField({ name: 'title', type: 'string' }),
     defineField({
@@ -14,25 +13,16 @@ export default defineType({
       type: 'text',
       rows: 24,
       description: 'Paste full IPUZ JSON (crossword kind).',
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.required()
     }),
     defineField({
       name: 'slug',
       type: 'slug',
-      options: {
-        source: 'title',
-        slugify: (v: string) =>
-          v
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/(^-|-$)/g, ''),
-      },
-    }),
+      options: { source: 'title', slugify: (v: string) => v.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') }
+    })
   ],
   preview: {
     select: { title: 'title' },
-    prepare({ title }) {
-      return { title: `🧩 ${title || 'Crossword (IPUZ)'}` };
-    },
-  },
+    prepare({ title }) { return { title: `🧩 ${title || 'Crossword (IPUZ)'}` }; }
+  }
 });
