@@ -83,8 +83,6 @@ export default defineType({
           ],
         },
         { type: 'callout' },
-        // in contentPage.ts (or equivalent), add to `content` array types:
-        { type: 'crosswordIpuz' },
       ],
     }),
 
