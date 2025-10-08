@@ -4,6 +4,6 @@
 ```bash
 git status
 git add -A
-git commit -m "aborting and going back to try again after crosswords"
+git commit -m "added crossword"
 git push origin main
 
