@@ -1,6 +1,5 @@
 import { client } from '@/lib/sanity.client';
 import { TOPICS_WITH_PAGES } from '@/lib/groq';
-import SiteHeader from '@/components/SiteHeader';
 import YearTopicAccordions, { YearGroup } from '@/components/YearTopicAccordions';
 
 export const revalidate = 300;
@@ -31,7 +30,6 @@ export default async function HomePage() {
 
   return (
     <>
-      <SiteHeader />
       <main className="mx-auto max-w-5xl px-4 py-8">
         {!years.length ? (
           <div className="rounded-xl border border-black p-6 text-neutral-700">
