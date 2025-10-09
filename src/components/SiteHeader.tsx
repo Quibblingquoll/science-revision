@@ -1,19 +1,36 @@
+'use client';
+
 import Link from 'next/link';
 
 export default function SiteHeader() {
   return (
-    <header className="border-b bg-white/70 backdrop-blur sticky top-0 z-30">
-      <div className="mx-auto max-w-5xl px-4 py-5 flex items-center justify-between">
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-cyan-600 to-emerald-600">
-            Science-Revision
-          </span>
-        </h1>
-        <nav className="text-sm text-neutral-600">
-          <Link href="/" className="hover:text-neutral-900">
-            Home
-          </Link>
-        </nav>
+    <header className="sticky top-0 z-50">
+      <div
+        className="
+          bg-sky-100/70 backdrop-blur-md
+          border-b border-black/10 shadow-sm
+        "
+      >
+        <div className="mx-auto max-w-5xl px-4 py-4">
+          {/* 3-col grid so the title stays perfectly centred */}
+          <div className="grid grid-cols-3 items-center">
+            <div /> {/* left spacer */}
+            <h1
+              className="
+                text-center text-3xl font-extrabold tracking-tight
+                bg-gradient-to-r from-sky-600 via-blue-600 to-emerald-600
+                bg-clip-text text-transparent
+              "
+            >
+              revise.idlerise
+            </h1>
+            <nav className="justify-self-end">
+              <Link href="/" className="text-sm text-gray-700 hover:text-gray-900 hover:underline">
+                Home
+              </Link>
+            </nav>
+          </div>
+        </div>
       </div>
     </header>
   );
