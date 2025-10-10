@@ -26,20 +26,16 @@ function groupByYear(topics: Topic[]): YearGroup[] {
 
 export default async function HomePage() {
   const topics: Topic[] = await client.fetch(TOPICS_WITH_PAGES);
-  const years = groupByYear(topics).filter((g) => g.year); // drop empty
+  const years = groupByYear(topics).filter((g) => g.year);
 
-  return (
-    <>
-      <main className="mx-auto max-w-5xl px-4 py-8">
-        {!years.length ? (
-          <div className="rounded-xl border border-black p-6 text-neutral-700">
-            No published content found yet. Add <code>Topic</code> and <code>Content Page</code>{' '}
-            docs in Studio and publish them.
-          </div>
-        ) : (
-          <YearTopicAccordions years={years} />
-        )}
-      </main>
-    </>
-  );
+  if (!years.length) {
+    return (
+      <div className="rounded-xl border border-black p-6 text-neutral-700">
+        No published content found yet. Add <code>Topic</code> and <code>Content Page</code> docs in
+        Studio and publish them.
+      </div>
+    );
+  }
+
+  return <YearTopicAccordions years={years} />;
 }
