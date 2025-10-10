@@ -1,7 +1,6 @@
 import { client } from '@/lib/sanity.client';
 import { TOPICS_WITH_PAGES } from '@/lib/groq';
 import YearTopicAccordions, { YearGroup } from '@/components/YearTopicAccordions';
-
 export const revalidate = 300;
 
 type Page = { title: string; slug: string };
