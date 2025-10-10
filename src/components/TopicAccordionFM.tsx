@@ -75,11 +75,7 @@ function TopicCard({ topic, defaultOpen = false }: { topic: Topic; defaultOpen?:
   );
 }
 
-export default function TopicAccordionFM({
-  topics,
-}: {
-  topics: Topic[];
-}) {
+export default function TopicAccordionFM({ topics }: { topics: Topic[] }) {
   // Open an item if the URL has a hash like #physics
   const hash = typeof window !== 'undefined' ? window.location.hash.replace(/^#/, '') : '';
   const initialSlug = useMemo(() => hash || '', [hash]);
