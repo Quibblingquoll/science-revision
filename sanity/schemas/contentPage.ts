@@ -12,7 +12,6 @@ export default defineType({
       validation: (r) => r.required(),
     }),
 
-    // 👇 Add back this slug
     defineField({
       name: 'slug',
       type: 'slug',
@@ -24,7 +23,6 @@ export default defineType({
       validation: (r) => r.required(),
     }),
 
-    // 👇 Keep the order field for sequencing inside a topic
     defineField({
       name: 'order',
       type: 'number',
@@ -32,7 +30,6 @@ export default defineType({
       description: 'Used to sort lessons in a topic.',
     }),
 
-    // 👇 Keep the topic reference so this page belongs to a topic
     defineField({
       name: 'topic',
       type: 'reference',
@@ -41,49 +38,33 @@ export default defineType({
       validation: (r) => r.required(),
     }),
 
-    // Keep hero, summary, content, etc. below
-    defineField({
-      name: 'hero',
-      title: 'Hero Image',
-      type: 'image',
-      options: { hotspot: true },
-      fields: [
-        { name: 'alt', type: 'string' },
-        { name: 'credit', type: 'string' },
-      ],
-    }),
-
-    defineField({
-      name: 'summary',
-      title: 'Summary',
-      type: 'array',
-      of: [{ type: 'block' }],
-    }),
-
-    // inside fields: [...]
     defineField({
       name: 'content',
       title: 'Content',
       type: 'array',
       of: [
-        { type: 'block' },
-        { type: 'figure' },
+        { type: 'block' }, // standard Portable Text
+        { type: 'figure' }, // custom image object (with caption/credit)
+        { type: 'youtube' }, // custom YouTube embed (if present in /objects)
+        { type: 'callout' }, // custom callout panel
+        { type: 'clozeBlock' }, // ✅ single-bank cloze passage block
+        { type: 'clozePasteBlock' },
         {
-          type: 'image', // 👈 image type
+          type: 'image',
           title: 'Image',
-          options: { hotspot: true }, // 👈 correct place for hotspot
+          options: { hotspot: true },
           fields: [
             {
               name: 'alt',
               type: 'string',
               title: 'Alt text',
               description: 'Short description for accessibility',
-              validation: (Rule) => Rule.required(),
+              validation: (r) => r.required(),
             },
           ],
         },
-        { type: 'callout' },
       ],
+      validation: (r) => r.min(1),
     }),
 
     defineField({
@@ -93,5 +74,11 @@ export default defineType({
       of: [{ type: 'reference', to: [{ type: 'outcome' }] }],
     }),
   ],
-  preview: { select: { title: 'title', subtitle: 'topic.title', media: 'hero' } },
+
+  preview: {
+    select: {
+      title: 'title',
+      subtitle: 'topic.title',
+    },
+  },
 });
