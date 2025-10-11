@@ -69,7 +69,6 @@ function splitWithBrackets(text: string): Part[] {
   let last = 0,
     m: RegExpExecArray | null,
     idx = 0;
-
   while ((m = re.exec(text))) {
     if (m.index > last) out.push({ type: 'text', value: text.slice(last, m.index) });
     out.push({ type: 'blank', answer: m[1].trim(), idx: idx++ });
@@ -96,6 +95,7 @@ function autoBlank(text: string, target = 12, minLen = 5): Part[] {
       }
     }
   }
+
   if (!wordIdxs.length) return [{ type: 'text', value: text }];
 
   const pickCount = Math.min(target, wordIdxs.length);
@@ -120,10 +120,86 @@ function autoBlank(text: string, target = 12, minLen = 5): Part[] {
   return out;
 }
 
+/* --------------------------------------------
+   ✨ Inline Dropdown (text-style, no box)
+-------------------------------------------- */
+function InlineDropdown({
+  idx,
+  answer,
+  value,
+  options,
+  onChange,
+  checked,
+  caseSensitive,
+}: {
+  idx: number;
+  answer: string;
+  value: string;
+  options: string[];
+  onChange: (v: string) => void;
+  checked: boolean;
+  caseSensitive: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const norm = (s: string) => (caseSensitive ? s : s.toLowerCase().trim());
+  const correct = checked && value && norm(value) === norm(answer);
+
+  return (
+    <span className="relative inline-block mx-1">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className={[
+          'underline underline-offset-4 decoration-neutral-300 hover:decoration-neutral-500',
+          'text-base transition select-none',
+          checked
+            ? correct
+              ? 'text-green-700 decoration-green-400'
+              : 'text-red-700 decoration-red-400'
+            : 'text-neutral-800',
+        ].join(' ')}
+      >
+        {value || '— choose —'} <span className="text-neutral-400">▾</span>
+      </button>
+
+      {open && (
+        <ul
+          className="absolute z-10 mt-1 bg-white/95 rounded-lg shadow-lg ring-1 ring-black/5 min-w-[8rem] p-1"
+          onMouseLeave={() => setOpen(false)}
+        >
+          {options.map((opt) => (
+            <li
+              key={opt}
+              onClick={() => {
+                onChange(opt);
+                setOpen(false);
+              }}
+              className="cursor-pointer px-3 py-1 rounded-md hover:bg-neutral-100 active:bg-neutral-200"
+            >
+              {opt}
+            </li>
+          ))}
+          <li
+            onClick={() => {
+              onChange('');
+              setOpen(false);
+            }}
+            className="cursor-pointer px-3 py-1 rounded-md text-neutral-500 hover:bg-neutral-100"
+          >
+            Clear
+          </li>
+        </ul>
+      )}
+    </span>
+  );
+}
+
+/* --------------------------------------------
+   ✨ Main Component
+-------------------------------------------- */
 export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
   const { text, targetBlanks = 12, minLen = 5, caseSensitive = false } = value;
 
-  // Build parts + answers
   const parts = useMemo<Part[]>(() => {
     const hasBrackets = /\[[^\]]+\]/.test(text);
     return hasBrackets ? splitWithBrackets(text) : autoBlank(text, targetBlanks, minLen);
@@ -132,7 +208,6 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
   const blanks = parts.filter((p) => p.type === 'blank') as Array<Extract<Part, { type: 'blank' }>>;
   const answers = blanks.map((b) => b.answer);
 
-  // unique pool (with counts for duplicates)
   const initialCounts = useMemo(() => {
     const m = new Map<string, number>();
     for (const a of answers) m.set(a, (m.get(a) ?? 0) + 1);
@@ -195,38 +270,23 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
 
   return (
     <div className="my-8 rounded-2xl border border-neutral-200 bg-gradient-to-br from-blue-50 via-indigo-50 to-pink-50 p-6 shadow-sm">
-      <div className="bg-white/90 rounded-xl p-5 shadow-inner">
-        <div className="leading-relaxed text-neutral-800">
-          {parts.map((p, i) =>
-            p.type === 'text' ? (
-              <span key={i}>{p.value}</span>
-            ) : (
-              <select
-                key={i}
-                value={selected[p.idx] || ''}
-                onChange={(e) => onSelect(p.idx, e.target.value)}
-                className={[
-                  'mx-1 px-2 py-1 border rounded-md text-neutral-700',
-                  'bg-white shadow-sm transition focus:outline-none focus:ring-2 focus:ring-indigo-300',
-                  checked
-                    ? norm(selected[p.idx]) === norm(p.answer)
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-red-500 bg-red-50'
-                    : 'border-neutral-300',
-                ].join(' ')}
-              >
-                <option value="" disabled>
-                  — choose —
-                </option>
-                {optionsFor(p.idx).map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
-            )
-          )}
-        </div>
+      <div className="bg-white/90 rounded-xl p-5 shadow-inner leading-relaxed text-neutral-800">
+        {parts.map((p, i) =>
+          p.type === 'text' ? (
+            <span key={i}>{p.value}</span>
+          ) : (
+            <InlineDropdown
+              key={i}
+              idx={p.idx}
+              answer={p.answer}
+              value={selected[p.idx] || ''}
+              options={optionsFor(p.idx)}
+              onChange={(v) => onSelect(p.idx, v)}
+              checked={checked}
+              caseSensitive={caseSensitive}
+            />
+          )
+        )}
       </div>
 
       <div className="mt-4 flex flex-wrap gap-3">
