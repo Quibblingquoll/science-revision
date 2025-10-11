@@ -129,7 +129,7 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
     return hasBrackets ? splitWithBrackets(text) : autoBlank(text, targetBlanks, minLen);
   }, [text, targetBlanks, minLen]);
 
-  const blanks = parts.filter((p): p is Extract<Part, { type: 'blank' }> => p.type === 'blank');
+  const blanks = parts.filter((p) => p.type === 'blank') as Array<Extract<Part, { type: 'blank' }>>;
   const answers = blanks.map((b) => b.answer);
 
   // unique pool (with counts for duplicates)
