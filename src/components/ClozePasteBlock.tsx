@@ -132,37 +132,31 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
   const blanks = parts.filter((p): p is Extract<Part, { type: 'blank' }> => p.type === 'blank');
   const answers = blanks.map((b) => b.answer);
 
-  // Unique answers and counts (supports duplicates)
+  // unique pool (with counts for duplicates)
   const initialCounts = useMemo(() => {
     const m = new Map<string, number>();
     for (const a of answers) m.set(a, (m.get(a) ?? 0) + 1);
     return m;
-  }, [text]); // recalc when the passage changes
+  }, [text]);
 
-  // State
   const [counts, setCounts] = useState<Map<string, number>>(initialCounts);
   const [selected, setSelected] = useState<string[]>(Array(blanks.length).fill(''));
   const [checked, setChecked] = useState(false);
   const [revealed, setRevealed] = useState(false);
 
-  // Keep an immutable, shuffled list of unique options for nicer UX
   const uniqueOptions = useMemo(() => shuffle([...new Set(answers)]), [text]);
-
   const norm = (s: string) => (caseSensitive ? s : s.toLowerCase().trim());
 
   const onSelect = (i: number, next: string) => {
     setSelected((prev) => {
       const curr = prev[i];
       if (curr === next) return prev;
-
-      // Return previous selection to pool
       setCounts((old) => {
         const m = new Map(old);
         if (curr) m.set(curr, (m.get(curr) ?? 0) + 1);
         if (next) m.set(next, Math.max(0, (m.get(next) ?? 0) - 1));
         return m;
       });
-
       const copy = prev.slice();
       copy[i] = next;
       return copy;
@@ -172,10 +166,8 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
   };
 
   const optionsFor = (i: number) => {
-    // Show any word with remaining count > 0, plus the currently selected (so it doesn't disappear)
     const current = selected[i];
-    const list = uniqueOptions.filter((opt) => (counts.get(opt) ?? 0) > 0 || opt === current);
-    return list;
+    return uniqueOptions.filter((opt) => (counts.get(opt) ?? 0) > 0 || opt === current);
   };
 
   const score = checked
@@ -186,9 +178,7 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
     setChecked(true);
     setRevealed(false);
   };
-
   const onReveal = () => {
-    // Fill with correct answers and zero out the pool
     setSelected(blanks.map((b) => b.answer));
     const m = new Map<string, number>();
     for (const a of uniqueOptions) m.set(a, 0);
@@ -196,7 +186,6 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
     setRevealed(true);
     setChecked(false);
   };
-
   const onReset = () => {
     setSelected(Array(blanks.length).fill(''));
     setCounts(initialCounts);
@@ -205,55 +194,69 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
   };
 
   return (
-    <div className="my-6">
-      <div className="leading-relaxed">
-        {parts.map((p, i) =>
-          p.type === 'text' ? (
-            <span key={i}>{p.value}</span>
-          ) : (
-            <select
-              key={i}
-              value={selected[p.idx] || ''}
-              onChange={(e) => onSelect(p.idx, e.target.value)}
-              className={[
-                'mx-1 px-2 py-1 border rounded-md bg-white align-baseline',
-                checked
-                  ? norm(selected[p.idx]) === norm(p.answer)
-                    ? 'border-green-600'
-                    : 'border-red-600'
-                  : 'border-neutral-300',
-              ].join(' ')}
-              aria-label={`Blank ${p.idx + 1}`}
-            >
-              <option value="" disabled>
-                — choose —
-              </option>
-              {optionsFor(p.idx).map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
+    <div className="my-8 rounded-2xl border border-neutral-200 bg-gradient-to-br from-blue-50 via-indigo-50 to-pink-50 p-6 shadow-sm">
+      <div className="bg-white/90 rounded-xl p-5 shadow-inner">
+        <div className="leading-relaxed text-neutral-800">
+          {parts.map((p, i) =>
+            p.type === 'text' ? (
+              <span key={i}>{p.value}</span>
+            ) : (
+              <select
+                key={i}
+                value={selected[p.idx] || ''}
+                onChange={(e) => onSelect(p.idx, e.target.value)}
+                className={[
+                  'mx-1 px-2 py-1 border rounded-md text-neutral-700',
+                  'bg-white shadow-sm transition focus:outline-none focus:ring-2 focus:ring-indigo-300',
+                  checked
+                    ? norm(selected[p.idx]) === norm(p.answer)
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-red-500 bg-red-50'
+                    : 'border-neutral-300',
+                ].join(' ')}
+              >
+                <option value="" disabled>
+                  — choose —
                 </option>
-              ))}
-            </select>
-          )
-        )}
+                {optionsFor(p.idx).map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+            )
+          )}
+        </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        <button onClick={onCheck} className="rounded-xl px-3 py-1 border shadow-sm hover:shadow">
-          Check answers
+      <div className="mt-4 flex flex-wrap gap-3">
+        <button
+          onClick={onCheck}
+          className="rounded-xl bg-indigo-500 text-white px-3 py-1 shadow hover:bg-indigo-600"
+        >
+          Check
         </button>
-        <button onClick={onReveal} className="rounded-xl px-3 py-1 border shadow-sm hover:shadow">
+        <button
+          onClick={onReveal}
+          className="rounded-xl bg-amber-400 text-white px-3 py-1 shadow hover:bg-amber-500"
+        >
           Reveal
         </button>
-        <button onClick={onReset} className="rounded-xl px-3 py-1 border shadow-sm hover:shadow">
+        <button
+          onClick={onReset}
+          className="rounded-xl bg-neutral-300 text-neutral-800 px-3 py-1 shadow hover:bg-neutral-400"
+        >
           Reset
         </button>
+
         {checked && (
-          <span className="ml-2 self-center text-sm">
+          <span className="ml-2 self-center text-sm text-neutral-700">
             Score: <strong>{score}</strong> / {blanks.length}
           </span>
         )}
-        {revealed && <span className="ml-2 self-center text-sm italic">Answers revealed</span>}
+        {revealed && (
+          <span className="ml-2 self-center text-sm italic text-neutral-600">Answers revealed</span>
+        )}
       </div>
     </div>
   );
