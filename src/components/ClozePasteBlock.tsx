@@ -220,6 +220,18 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
   const blanks = parts.filter((p) => p.type === 'blank') as Array<Extract<Part, { type: 'blank' }>>;
   const answers = blanks.map((b) => b.answer);
 
+  // Position map for correct placement of each word
+  const positionsByWord = useMemo(() => {
+    const m = new Map<string, number[]>();
+    blanks.forEach((b) => {
+      const arr = m.get(b.answer) ?? [];
+      arr.push(b.idx);
+      m.set(b.answer, arr);
+    });
+    m.forEach((arr) => arr.sort((a, b) => a - b));
+    return m;
+  }, [blanks]);
+
   const initialCounts = useMemo(() => {
     const m = new Map<string, number>();
     for (const a of answers) m.set(a, (m.get(a) ?? 0) + 1);
@@ -258,11 +270,12 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
     return uniqueOptions.filter((opt) => (counts.get(opt) ?? 0) > 0 || opt === current);
   };
 
-  const fillNextEmptyBlank = (word: string) => {
-    const nextIndex = selected.findIndex((v) => !v);
-    if (nextIndex !== -1) {
-      onSelect(nextIndex, word);
-    }
+  // Fill correct blank for clicked word
+  const fillCorrectBlank = (word: string) => {
+    const slots = positionsByWord.get(word);
+    if (!slots || !slots.length) return;
+    const emptyIdx = slots.find((i) => !selected[i]);
+    if (emptyIdx !== undefined) onSelect(emptyIdx, word);
   };
 
   const score = checked
@@ -355,13 +368,12 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
       </div>
 
       {/* Word Bank */}
-      <div className="bg-indigo-50/60 rounded-xl p-3 mb-4 border border-indigo-100 shadow-inner">
-        <h4 className="text-sm font-semibold text-indigo-700 mb-1">Word Bank</h4>
-        <div className="leading-relaxed text-base text-neutral-700 flex flex-wrap gap-x-3 gap-y-1">
+      <div className="bg-indigo-50/60 rounded-lg p-2 mb-4 border border-indigo-100 shadow-inner text-center">
+        <div className="leading-relaxed text-base text-neutral-700 flex flex-wrap justify-center gap-x-3 gap-y-1">
           {wordBank.map(({ word, remaining }) => (
             <span
               key={word}
-              onClick={() => remaining > 0 && fillNextEmptyBlank(word)}
+              onClick={() => remaining > 0 && fillCorrectBlank(word)}
               className={`cursor-pointer transition ${
                 remaining > 0
                   ? 'hover:text-indigo-600'
