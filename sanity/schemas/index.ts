@@ -6,8 +6,6 @@ import outcome from './outcome';
 import youtube from './objects/youtube';
 import callout from './objects/callout';
 import figure from './objects/figure'; // 👈 add this line for your new figure schema
-import clozeBlock from './objects/clozeBlock';
-import clozePasteBlock from './objects/clozePasteBlock';
 
 export const schemaTypes = [
   topic,
@@ -16,11 +14,4 @@ export const schemaTypes = [
   youtube,
   callout,
   figure, // 👈 include new object schema
-  clozeBlock,
-   clozePasteBlock,
 ];
-
-
-
-
-

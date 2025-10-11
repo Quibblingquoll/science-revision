@@ -6,9 +6,6 @@ import Image from 'next/image';
 import clsx from 'clsx';
 import { urlFor } from '@/lib/sanity.image';
 
-// 🔌 Cloze: import the interactive single-bank block
-import ClozeBlock, { type ClozeBlockProps } from '@/components/ClozeBlock';
-
 /* ---------------------------------- */
 /* Types shared by our renderers      */
 /* ---------------------------------- */
@@ -75,6 +72,7 @@ const fadeIn: Variants = {
 
 function Figure({ value }: { value: FigureValue }) {
   const { image, caption, credit, maxWidth = 'wide' } = value || {};
+
   if (!image) return null;
 
   const widthClass =
@@ -97,7 +95,7 @@ function Figure({ value }: { value: FigureValue }) {
         alt={alt}
         width={1600}
         height={900}
-        className="w-full h-auto rounded-xl shadow-md"
+        className="rounded-xl shadow-md w-full h-auto"
         placeholder={lqip ? 'blur' : 'empty'}
         blurDataURL={lqip}
         sizes="(min-width:1024px) 800px, 100vw"
@@ -176,8 +174,6 @@ export const components: PortableTextComponents = {
     figure: Figure,
     callout: Callout,
     image: SimpleImage,
-    // ✅ Single-bank Cloze block
-    clozeBlock: ({ value }: { value: ClozeBlockProps }) => <ClozeBlock {...value} />,
   },
   block: {
     h2: ({ children }) => (
