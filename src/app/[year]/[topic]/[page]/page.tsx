@@ -3,13 +3,14 @@ import { PortableText, type PortableTextComponents } from '@portabletext/react';
 import Image from 'next/image';
 import { urlFor } from '@/lib/sanity.image';
 import PrevNextNav from '@/components/PrevNextNav';
+import ClozePasteBlock from '@/components/ClozePasteBlock'; // ✅ NEW import
 
 export const revalidate = 300;
 
 type RouteParams = { year: string; topic: string; page: string };
 
 /* --------------------------------------
-   Portable Text renderers (image + figure)
+   Portable Text renderers (image + figure + cloze)
 -------------------------------------- */
 const components: PortableTextComponents = {
   types: {
@@ -34,6 +35,7 @@ const components: PortableTextComponents = {
         </figure>
       );
     },
+
     figure: ({ value }) => {
       const src = urlFor(value?.image).width(1200).fit('max').url();
       if (!src) return null;
@@ -55,6 +57,9 @@ const components: PortableTextComponents = {
         </figure>
       );
     },
+
+    // 🧩 Cloze Paste Block
+    clozePasteBlock: ({ value }) => <ClozePasteBlock value={value} />, // ✅ NEW
   },
 };
 
@@ -62,7 +67,6 @@ const components: PortableTextComponents = {
    Page component
 -------------------------------------- */
 export default async function ContentPage({ params }: { params: Promise<RouteParams> }) {
-  // ⬇️ include year so we can build the prev/next hrefs correctly
   const { year, topic, page } = await params;
 
   const data = await client.fetch(
