@@ -342,28 +342,31 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
 
   return (
     <div className="my-8 rounded-2xl border border-neutral-200 bg-gradient-to-br from-blue-50 via-indigo-50 to-pink-50 p-6 shadow-sm">
-      {/* Mode Switch */}
-      <div className="flex justify-end gap-2 mb-3">
-        <button
-          onClick={() => setMode('typed')}
-          className={`px-3 py-1 rounded-full text-sm shadow-sm ${
-            mode === 'typed'
-              ? 'bg-indigo-500 text-white'
-              : 'bg-white text-neutral-700 hover:bg-neutral-100'
-          }`}
-        >
-          ✏️ Typed
-        </button>
-        <button
-          onClick={() => setMode('dropdown')}
-          className={`px-3 py-1 rounded-full text-sm shadow-sm ${
-            mode === 'dropdown'
-              ? 'bg-indigo-500 text-white'
-              : 'bg-white text-neutral-700 hover:bg-neutral-100'
-          }`}
-        >
-          🔽 Dropdown
-        </button>
+      {/* Header + Mode Switch */}
+      <div className="flex justify-between items-center mb-3 flex-wrap gap-2">
+        <h3 className="text-lg font-semibold text-neutral-800">Fill in the blanks</h3>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setMode('typed')}
+            className={`px-3 py-1 rounded-full text-sm shadow-sm ${
+              mode === 'typed'
+                ? 'bg-indigo-500 text-white'
+                : 'bg-white text-neutral-700 hover:bg-neutral-100'
+            }`}
+          >
+            ✏️ Typed
+          </button>
+          <button
+            onClick={() => setMode('dropdown')}
+            className={`px-3 py-1 rounded-full text-sm shadow-sm ${
+              mode === 'dropdown'
+                ? 'bg-indigo-500 text-white'
+                : 'bg-white text-neutral-700 hover:bg-neutral-100'
+            }`}
+          >
+            🔽 Dropdown
+          </button>
+        </div>
       </div>
 
       {/* Word Bank */}
