@@ -1,4 +1,4 @@
-// /schemas/contentPage.ts
+// sanity/schemas/contentPage.ts
 import { defineType, defineField } from 'sanity';
 
 export default defineType({
@@ -9,22 +9,17 @@ export default defineType({
     defineField({
       name: 'title',
       type: 'string',
-      validation: (r) => r.required(),
+      validation: (Rule) => Rule.required(),
     }),
 
-    // 👇 Add back this slug
     defineField({
       name: 'slug',
       type: 'slug',
       title: 'Slug',
-      options: {
-        source: 'title',
-        maxLength: 96,
-      },
-      validation: (r) => r.required(),
+      options: { source: 'title', maxLength: 96 },
+      validation: (Rule) => Rule.required(),
     }),
 
-    // 👇 Keep the order field for sequencing inside a topic
     defineField({
       name: 'order',
       type: 'number',
@@ -32,24 +27,22 @@ export default defineType({
       description: 'Used to sort lessons in a topic.',
     }),
 
-    // 👇 Keep the topic reference so this page belongs to a topic
     defineField({
       name: 'topic',
       type: 'reference',
       title: 'Topic',
       to: [{ type: 'topic' }],
-      validation: (r) => r.required(),
+      validation: (Rule) => Rule.required(),
     }),
 
-    // Keep hero, summary, content, etc. below
     defineField({
       name: 'hero',
       title: 'Hero Image',
       type: 'image',
       options: { hotspot: true },
       fields: [
-        { name: 'alt', type: 'string' },
-        { name: 'credit', type: 'string' },
+        { name: 'alt', type: 'string', title: 'Alt text' },
+        { name: 'credit', type: 'string', title: 'Credit' },
       ],
     }),
 
@@ -60,7 +53,6 @@ export default defineType({
       of: [{ type: 'block' }],
     }),
 
-    // inside fields: [...]
     defineField({
       name: 'content',
       title: 'Content',
@@ -69,9 +61,9 @@ export default defineType({
         { type: 'block' },
         { type: 'figure' },
         {
-          type: 'image', // 👈 image type
+          type: 'image',
           title: 'Image',
-          options: { hotspot: true }, // 👈 correct place for hotspot
+          options: { hotspot: true },
           fields: [
             {
               name: 'alt',
@@ -83,6 +75,7 @@ export default defineType({
           ],
         },
         { type: 'callout' },
+        { type: 'clozePasteBlock' }, // ✅ Cloze (Paste Text) block
       ],
     }),
 
@@ -93,5 +86,7 @@ export default defineType({
       of: [{ type: 'reference', to: [{ type: 'outcome' }] }],
     }),
   ],
-  preview: { select: { title: 'title', subtitle: 'topic.title', media: 'hero' } },
+  preview: {
+    select: { title: 'title', subtitle: 'topic.title', media: 'hero' },
+  },
 });
