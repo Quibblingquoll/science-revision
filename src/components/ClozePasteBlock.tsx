@@ -2,7 +2,9 @@
 
 import { useMemo, useState } from 'react';
 
-/** Props coming from Sanity */
+/* =========================================
+   Types and helpers
+========================================= */
 type ClozeValue = {
   text: string;
   targetBlanks?: number;
@@ -10,7 +12,6 @@ type ClozeValue = {
   caseSensitive?: boolean;
 };
 
-/** Internal representation of the parsed passage */
 type Part = { type: 'text'; value: string } | { type: 'blank'; answer: string; idx: number };
 
 const STOPWORDS = new Set([
@@ -66,7 +67,9 @@ const shuffle = <T,>(arr: T[]) => {
   return a;
 };
 
-/** Parse [bracketed] answers into blanks */
+/* =========================================
+   Text parsing
+========================================= */
 function splitWithBrackets(text: string): Part[] {
   const out: Part[] = [];
   const re = /\[([^\]]+)\]/g;
@@ -82,7 +85,6 @@ function splitWithBrackets(text: string): Part[] {
   return out;
 }
 
-/** Auto-select words to blank if no [brackets] are present */
 function autoBlank(text: string, target = 12, minLen = 5): Part[] {
   const tokens = Array.from(text.matchAll(/(\p{L}[\p{L}\p{M}'-]*|\s+|[^\s\p{L}\p{M}])/gu)).map(
     (t) => t[0]
@@ -102,7 +104,6 @@ function autoBlank(text: string, target = 12, minLen = 5): Part[] {
   }
   if (!wordIdxs.length) return [{ type: 'text', value: text }];
 
-  // pick evenly spaced candidates
   const pickCount = Math.min(target, wordIdxs.length);
   const picks = new Set<number>();
   for (let p = 0; p < pickCount; p++) {
@@ -125,9 +126,9 @@ function autoBlank(text: string, target = 12, minLen = 5): Part[] {
   return out;
 }
 
-/* =========================================================
-   Inline Dropdown (text-style, no box, no "choose" prefill)
-   ========================================================= */
+/* =========================================
+   Inline Dropdown (no “choose”, dynamic width)
+========================================= */
 function InlineDropdown({
   idx,
   answer,
@@ -148,18 +149,16 @@ function InlineDropdown({
   const [open, setOpen] = useState(false);
   const norm = (s: string) => (caseSensitive ? s : s.toLowerCase().trim());
   const correct = checked && value && norm(value) === norm(answer);
+  const chWidth = Math.max(answer.length, 4);
 
   return (
-    <span className="relative inline-block mx-1">
+    <span className="relative inline-block mx-1 align-baseline">
       <button
         type="button"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-controls={`cloze-list-${idx}`}
         onClick={() => setOpen((o) => !o)}
         className={[
-          'border-b border-neutral-300 focus:outline-none text-base transition select-none align-baseline',
-          'hover:border-neutral-400 min-w-[4ch]',
+          'border-b border-neutral-300 focus:outline-none text-base transition select-none',
+          'hover:border-neutral-400',
           checked
             ? correct
               ? 'text-green-700 border-green-400'
@@ -169,6 +168,7 @@ function InlineDropdown({
             ? "text-transparent after:content-['_'] after:text-neutral-400 after:align-baseline"
             : '',
         ].join(' ')}
+        style={{ minWidth: `${chWidth * 0.62}em` }}
       >
         {value || '\u00A0'}
         <span className="text-neutral-400 ml-1">▾</span>
@@ -176,16 +176,12 @@ function InlineDropdown({
 
       {open && (
         <ul
-          id={`cloze-list-${idx}`}
-          role="listbox"
           className="absolute z-10 mt-1 bg-white/95 rounded-lg shadow-lg ring-1 ring-black/5 min-w-[8rem] p-1"
           onMouseLeave={() => setOpen(false)}
         >
           {options.map((opt) => (
             <li
               key={opt}
-              role="option"
-              aria-selected={value === opt}
               onClick={() => {
                 onChange(opt);
                 setOpen(false);
@@ -196,8 +192,6 @@ function InlineDropdown({
             </li>
           ))}
           <li
-            role="option"
-            aria-selected={value === ''}
             onClick={() => {
               onChange('');
               setOpen(false);
@@ -212,13 +206,12 @@ function InlineDropdown({
   );
 }
 
-/* ==========================
-   Main ClozePasteBlock
-   ========================== */
+/* =========================================
+   Main Component
+========================================= */
 export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
   const { text, targetBlanks = 12, minLen = 5, caseSensitive = false } = value;
 
-  // Build parts from text
   const parts = useMemo<Part[]>(() => {
     const hasBrackets = /\[[^\]]+\]/.test(text);
     return hasBrackets ? splitWithBrackets(text) : autoBlank(text, targetBlanks, minLen);
@@ -227,7 +220,6 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
   const blanks = parts.filter((p) => p.type === 'blank') as Array<Extract<Part, { type: 'blank' }>>;
   const answers = blanks.map((b) => b.answer);
 
-  // pool with counts (supports duplicate answers)
   const initialCounts = useMemo(() => {
     const m = new Map<string, number>();
     for (const a of answers) m.set(a, (m.get(a) ?? 0) + 1);
@@ -238,7 +230,7 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
   const [selected, setSelected] = useState<string[]>(Array(blanks.length).fill(''));
   const [checked, setChecked] = useState(false);
   const [revealed, setRevealed] = useState(false);
-  const [mode, setMode] = useState<'dropdown' | 'typed'>('dropdown'); // ✨ switchable
+  const [mode, setMode] = useState<'dropdown' | 'typed'>('dropdown');
 
   const uniqueOptions = useMemo(() => shuffle([...new Set(answers)]), [text]);
   const norm = (s: string) => (caseSensitive ? s : s.toLowerCase().trim());
@@ -247,14 +239,12 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
     setSelected((prev) => {
       const curr = prev[i];
       if (curr === next) return prev;
-
       setCounts((old) => {
         const m = new Map(old);
-        if (curr) m.set(curr, (m.get(curr) ?? 0) + 1); // return previous to pool
-        if (next) m.set(next, Math.max(0, (m.get(next) ?? 0) - 1)); // take next from pool
+        if (curr) m.set(curr, (m.get(curr) ?? 0) + 1);
+        if (next) m.set(next, Math.max(0, (m.get(next) ?? 0) - 1));
         return m;
       });
-
       const copy = prev.slice();
       copy[i] = next;
       return copy;
@@ -291,27 +281,27 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
     setRevealed(false);
   };
 
-  // renderers for the two modes
-  const renderBlankTyped = (p: Extract<Part, { type: 'blank' }>) => (
-    <input
-      key={p.idx}
-      type="text"
-      inputMode="text"
-      value={selected[p.idx] || ''}
-      onChange={(e) => onSelect(p.idx, e.target.value)}
-      className={[
-        'mx-1 bg-transparent border-b border-neutral-300 focus:border-indigo-400 focus:outline-none',
-        'text-neutral-800 px-1 align-baseline',
-        checked
-          ? norm(selected[p.idx]) === norm(p.answer)
-            ? 'border-green-500 text-green-700'
-            : 'border-red-500 text-red-700'
-          : '',
-      ].join(' ')}
-      style={{ minWidth: '4ch' }}
-      aria-label={`Blank ${p.idx + 1}`}
-    />
-  );
+  const renderBlankTyped = (p: Extract<Part, { type: 'blank' }>) => {
+    const chWidth = Math.max(p.answer.length, 4);
+    return (
+      <input
+        key={p.idx}
+        type="text"
+        value={selected[p.idx] || ''}
+        onChange={(e) => onSelect(p.idx, e.target.value)}
+        className={[
+          'mx-1 bg-transparent border-b border-neutral-300 focus:border-indigo-400 focus:outline-none',
+          'text-neutral-800 px-1 align-baseline',
+          checked
+            ? norm(selected[p.idx]) === norm(p.answer)
+              ? 'border-green-500 text-green-700'
+              : 'border-red-500 text-red-700'
+            : '',
+        ].join(' ')}
+        style={{ width: `${chWidth * 0.62}em` }}
+      />
+    );
+  };
 
   const renderBlankDropdown = (p: Extract<Part, { type: 'blank' }>) => (
     <InlineDropdown
@@ -325,6 +315,14 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
       caseSensitive={caseSensitive}
     />
   );
+
+  /* -------------------------
+     Word Bank display
+  -------------------------- */
+  const wordBank = uniqueOptions.map((opt) => ({
+    word: opt,
+    remaining: counts.get(opt) ?? 0,
+  }));
 
   return (
     <div className="my-8 rounded-2xl border border-neutral-200 bg-gradient-to-br from-blue-50 via-indigo-50 to-pink-50 p-6 shadow-sm">
@@ -352,7 +350,26 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
         </button>
       </div>
 
-      {/* Cloze content card */}
+      {/* Word Bank */}
+      <div className="bg-indigo-50/80 rounded-xl p-3 mb-4 border border-indigo-100 shadow-inner">
+        <h4 className="text-sm font-semibold text-indigo-700 mb-2">Word Bank</h4>
+        <div className="flex flex-wrap gap-2">
+          {wordBank.map(({ word, remaining }) => (
+            <span
+              key={word}
+              className={`px-2 py-1 rounded-md text-sm ${
+                remaining > 0
+                  ? 'bg-white border border-indigo-200 text-neutral-800 shadow-sm'
+                  : 'bg-neutral-100 text-neutral-400 line-through'
+              }`}
+            >
+              {word}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Cloze content */}
       <div className="bg-white/90 rounded-xl p-5 shadow-inner leading-relaxed text-neutral-800">
         {parts.map((p, i) =>
           p.type === 'text' ? (
