@@ -171,7 +171,6 @@ function InlineDropdown({
         style={{ minWidth: `${chWidth * 0.62}em` }}
       >
         {value || '\u00A0'}
-        <span className="text-neutral-400 ml-1">▾</span>
       </button>
 
       {open && (
