@@ -120,9 +120,9 @@ function autoBlank(text: string, target = 12, minLen = 5): Part[] {
   return out;
 }
 
-/* --------------------------------------------
-   ✨ Inline Dropdown (text-style, no box)
--------------------------------------------- */
+/* ---------------------------
+   Inline Dropdown Component
+--------------------------- */
 function InlineDropdown({
   idx,
   answer,
@@ -194,9 +194,9 @@ function InlineDropdown({
   );
 }
 
-/* --------------------------------------------
-   ✨ Main Component
--------------------------------------------- */
+/* ---------------------------
+   Main Component
+--------------------------- */
 export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
   const { text, targetBlanks = 12, minLen = 5, caseSensitive = false } = value;
 
@@ -218,6 +218,7 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
   const [selected, setSelected] = useState<string[]>(Array(blanks.length).fill(''));
   const [checked, setChecked] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  const [mode, setMode] = useState<'dropdown' | 'typed'>('dropdown'); // 🔘 mode switch
 
   const uniqueOptions = useMemo(() => shuffle([...new Set(answers)]), [text]);
   const norm = (s: string) => (caseSensitive ? s : s.toLowerCase().trim());
@@ -268,27 +269,80 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
     setRevealed(false);
   };
 
+  /* ----- RENDERERS FOR BOTH MODES ----- */
+  const renderBlankTyped = (p: Extract<Part, { type: 'blank' }>) => (
+    <input
+      key={p.idx}
+      type="text"
+      value={selected[p.idx] || ''}
+      onChange={(e) => onSelect(p.idx, e.target.value)}
+      className={[
+        'mx-1 bg-transparent border-b border-neutral-400 focus:border-indigo-400 focus:outline-none',
+        'text-neutral-800 px-1',
+        checked
+          ? norm(selected[p.idx]) === norm(p.answer)
+            ? 'border-green-500 text-green-700'
+            : 'border-red-500 text-red-700'
+          : '',
+      ].join(' ')}
+      style={{ minWidth: '4ch' }}
+    />
+  );
+
+  const renderBlankDropdown = (p: Extract<Part, { type: 'blank' }>) => (
+    <InlineDropdown
+      key={p.idx}
+      idx={p.idx}
+      answer={p.answer}
+      value={selected[p.idx] || ''}
+      options={optionsFor(p.idx)}
+      onChange={(v) => onSelect(p.idx, v)}
+      checked={checked}
+      caseSensitive={caseSensitive}
+    />
+  );
+
+  /* ----- MAIN RETURN ----- */
   return (
     <div className="my-8 rounded-2xl border border-neutral-200 bg-gradient-to-br from-blue-50 via-indigo-50 to-pink-50 p-6 shadow-sm">
+      {/* 🔘 MODE SWITCH BAR */}
+      <div className="flex justify-end gap-2 mb-3">
+        <button
+          onClick={() => setMode('typed')}
+          className={`px-3 py-1 rounded-full text-sm shadow-sm ${
+            mode === 'typed'
+              ? 'bg-indigo-500 text-white'
+              : 'bg-white text-neutral-700 hover:bg-neutral-100'
+          }`}
+        >
+          ✏️ Typed
+        </button>
+        <button
+          onClick={() => setMode('dropdown')}
+          className={`px-3 py-1 rounded-full text-sm shadow-sm ${
+            mode === 'dropdown'
+              ? 'bg-indigo-500 text-white'
+              : 'bg-white text-neutral-700 hover:bg-neutral-100'
+          }`}
+        >
+          🔽 Dropdown
+        </button>
+      </div>
+
+      {/* CLOZE CONTENT */}
       <div className="bg-white/90 rounded-xl p-5 shadow-inner leading-relaxed text-neutral-800">
         {parts.map((p, i) =>
           p.type === 'text' ? (
             <span key={i}>{p.value}</span>
+          ) : mode === 'typed' ? (
+            renderBlankTyped(p)
           ) : (
-            <InlineDropdown
-              key={i}
-              idx={p.idx}
-              answer={p.answer}
-              value={selected[p.idx] || ''}
-              options={optionsFor(p.idx)}
-              onChange={(v) => onSelect(p.idx, v)}
-              checked={checked}
-              caseSensitive={caseSensitive}
-            />
+            renderBlankDropdown(p)
           )
         )}
       </div>
 
+      {/* ACTION BUTTONS */}
       <div className="mt-4 flex flex-wrap gap-3">
         <button
           onClick={onCheck}
