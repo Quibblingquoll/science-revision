@@ -11,8 +11,6 @@ export const revalidate = 300;
 type RouteParams = { year: string; topic: string; page: string };
 
 /* ---- Local prop helpers (keep value non-optional) ---- */
-type PTProps<T> = { value: T };
-
 type SanityImage = {
   alt?: string;
   asset?: { metadata?: { lqip?: string } };
@@ -22,17 +20,6 @@ type SanityImage = {
 type FigureValue = {
   image?: SanityImage;
   caption?: string;
-};
-
-type ClozeBlockValue = {
-  _type: 'clozeBlock';
-  text: string;
-  blanks?: string[];
-};
-
-type ClozePasteBlockValue = {
-  _type: 'clozePasteBlock';
-  text: string;
 };
 
 /* --------------------------------------
@@ -97,12 +84,12 @@ const components = {
       );
     },
 
-    clozeBlock: ({ value }: { value: unknown }) => (
-      <ClozeBlock {...(value as React.ComponentProps<typeof ClozeBlock>)} />
+    // Use the actual component prop types to avoid mismatches
+    clozeBlock: ({ value }: { value: React.ComponentProps<typeof ClozeBlock> }) => (
+      <ClozeBlock {...value} />
     ),
-
-    clozePasteBlock: ({ value }: { value: unknown }) => (
-      <ClozePasteBlock {...(value as React.ComponentProps<typeof ClozePasteBlock>)} />
+    clozePasteBlock: ({ value }: { value: React.ComponentProps<typeof ClozePasteBlock> }) => (
+      <ClozePasteBlock {...value} />
     ),
   },
 };
@@ -129,8 +116,8 @@ export default async function ContentPage({ params }: { params: Promise<RoutePar
             asset->{ _id, metadata{ lqip } }
           }
         },
-        _type == "clozeBlock" => { _type, text, blanks },
-        _type == "clozePasteBlock" => { _type, text }
+        _type == "clozeBlock" => { _type, /* props will be spread */ text, blanks },
+        _type == "clozePasteBlock" => { _type, /* props will be spread */ text }
       }
     }`,
     { page }
@@ -140,9 +127,20 @@ export default async function ContentPage({ params }: { params: Promise<RoutePar
     return <div className="mx-auto max-w-3xl p-6 text-neutral-700">Not found</div>;
   }
 
+  // DEBUG: list block types without using `any`
+  type PTBlock = { _type?: string };
+  const blockTypes: (string | undefined)[] = Array.isArray(data.content)
+    ? (data.content as PTBlock[]).map((b) => b._type)
+    : [];
+
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="text-3xl font-bold mb-4">{data.title}</h1>
+
+      {/* DEBUG (remove when done) */}
+      <pre className="text-xs text-neutral-500 bg-neutral-100 p-2 rounded mb-4">
+        {JSON.stringify(blockTypes, null, 2)}
+      </pre>
 
       <article className="prose prose-neutral max-w-none">
         <PortableText value={data.content} components={components} />
