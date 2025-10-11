@@ -22,7 +22,7 @@ export default function SiteHeader() {
                 bg-clip-text text-transparent
               "
             >
-              revise.idlerise
+              Revision
             </h1>
             <nav className="justify-self-end">
               <Link href="/" className="text-sm text-gray-700 hover:text-gray-900 hover:underline">

@@ -127,7 +127,7 @@ function autoBlank(text: string, target = 12, minLen = 5): Part[] {
 }
 
 /* =========================================
-   Inline Dropdown (no “choose”, dynamic width)
+   Inline Dropdown (dynamic width, no “choose”)
 ========================================= */
 function InlineDropdown({
   idx,
@@ -159,11 +159,11 @@ function InlineDropdown({
         className={[
           'border-b border-neutral-300 focus:outline-none text-base transition select-none',
           'hover:border-neutral-400',
-          checked
-            ? correct
-              ? 'text-green-700 border-green-400'
-              : 'text-red-700 border-red-400'
-            : 'text-neutral-800',
+          correct
+            ? 'text-green-700 border-green-400 font-semibold'
+            : checked && value
+              ? 'text-red-700 border-red-400'
+              : 'text-neutral-800',
           !value
             ? "text-transparent after:content-['_'] after:text-neutral-400 after:align-baseline"
             : '',
@@ -283,6 +283,7 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
 
   const renderBlankTyped = (p: Extract<Part, { type: 'blank' }>) => {
     const chWidth = Math.max(p.answer.length, 4);
+    const correct = checked && norm(selected[p.idx]) === norm(p.answer);
     return (
       <input
         key={p.idx}
@@ -290,13 +291,12 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
         value={selected[p.idx] || ''}
         onChange={(e) => onSelect(p.idx, e.target.value)}
         className={[
-          'mx-1 bg-transparent border-b border-neutral-300 focus:border-indigo-400 focus:outline-none',
-          'text-neutral-800 px-1 align-baseline',
-          checked
-            ? norm(selected[p.idx]) === norm(p.answer)
-              ? 'border-green-500 text-green-700'
-              : 'border-red-500 text-red-700'
-            : '',
+          'mx-1 bg-transparent border-b focus:outline-none text-neutral-800 px-1 align-baseline transition-all',
+          correct
+            ? 'border-green-500 text-green-700 font-semibold'
+            : checked && selected[p.idx]
+              ? 'border-red-500 text-red-700'
+              : 'border-neutral-300 focus:border-indigo-400',
         ].join(' ')}
         style={{ width: `${chWidth * 0.62}em` }}
       />
@@ -316,9 +316,6 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
     />
   );
 
-  /* -------------------------
-     Word Bank display
-  -------------------------- */
   const wordBank = uniqueOptions.map((opt) => ({
     word: opt,
     remaining: counts.get(opt) ?? 0,
