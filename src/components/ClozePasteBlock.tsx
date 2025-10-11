@@ -127,7 +127,7 @@ function autoBlank(text: string, target = 12, minLen = 5): Part[] {
 }
 
 /* =========================================
-   Inline Dropdown
+   Inline Dropdown (no triangle)
 ========================================= */
 function InlineDropdown({
   idx,
@@ -219,7 +219,7 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
   const blanks = parts.filter((p) => p.type === 'blank') as Array<Extract<Part, { type: 'blank' }>>;
   const answers = blanks.map((b) => b.answer);
 
-  // Position map for correct placement of each word
+  // Map each answer word to its correct blank positions (kept in reading order)
   const positionsByWord = useMemo(() => {
     const m = new Map<string, number[]>();
     blanks.forEach((b) => {
@@ -269,7 +269,7 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
     return uniqueOptions.filter((opt) => (counts.get(opt) ?? 0) > 0 || opt === current);
   };
 
-  // Fill correct blank for clicked word
+  // Fill the next empty *correct* blank for a clicked word
   const fillCorrectBlank = (word: string) => {
     const slots = positionsByWord.get(word);
     if (!slots || !slots.length) return;
@@ -342,34 +342,7 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
 
   return (
     <div className="my-8 rounded-2xl border border-neutral-200 bg-gradient-to-br from-blue-50 via-indigo-50 to-pink-50 p-6 shadow-sm">
-      {/* Header + Mode Switch */}
-      <div className="flex justify-between items-center mb-3 flex-wrap gap-2">
-        <h3 className="text-lg font-semibold text-neutral-800">Fill in the blanks</h3>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setMode('typed')}
-            className={`px-3 py-1 rounded-full text-sm shadow-sm ${
-              mode === 'typed'
-                ? 'bg-indigo-500 text-white'
-                : 'bg-white text-neutral-700 hover:bg-neutral-100'
-            }`}
-          >
-            ✏️ Typed
-          </button>
-          <button
-            onClick={() => setMode('dropdown')}
-            className={`px-3 py-1 rounded-full text-sm shadow-sm ${
-              mode === 'dropdown'
-                ? 'bg-indigo-500 text-white'
-                : 'bg-white text-neutral-700 hover:bg-neutral-100'
-            }`}
-          >
-            🔽 Dropdown
-          </button>
-        </div>
-      </div>
-
-      {/* Word Bank */}
+      {/* Word Bank (centered, minimal padding, no title) */}
       <div className="bg-indigo-50/60 rounded-lg p-2 mb-4 border border-indigo-100 shadow-inner text-center">
         <div className="leading-relaxed text-base text-neutral-700 flex flex-wrap justify-center gap-x-3 gap-y-1">
           {wordBank.map(({ word, remaining }) => (
@@ -401,35 +374,64 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
         )}
       </div>
 
-      {/* Actions */}
-      <div className="mt-4 flex flex-wrap gap-3">
-        <button
-          onClick={onCheck}
-          className="rounded-xl bg-indigo-500 text-white px-3 py-1 shadow hover:bg-indigo-600"
-        >
-          Check
-        </button>
-        <button
-          onClick={onReveal}
-          className="rounded-xl bg-amber-400 text-white px-3 py-1 shadow hover:bg-amber-500"
-        >
-          Reveal
-        </button>
-        <button
-          onClick={onReset}
-          className="rounded-xl bg-neutral-300 text-neutral-800 px-3 py-1 shadow hover:bg-neutral-400"
-        >
-          Reset
-        </button>
+      {/* Actions + Mode Switch (bottom row) */}
+      <div className="mt-4 flex flex-wrap justify-between items-center gap-3">
+        {/* Left: actions */}
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={onCheck}
+            className="rounded-xl bg-indigo-500 text-white px-3 py-1 shadow hover:bg-indigo-600"
+          >
+            Check
+          </button>
+          <button
+            onClick={onReveal}
+            className="rounded-xl bg-amber-400 text-white px-3 py-1 shadow hover:bg-amber-500"
+          >
+            Reveal
+          </button>
+          <button
+            onClick={onReset}
+            className="rounded-xl bg-neutral-300 text-neutral-800 px-3 py-1 shadow hover:bg-neutral-400"
+          >
+            Reset
+          </button>
 
-        {checked && (
-          <span className="ml-2 self-center text-sm text-neutral-700">
-            Score: <strong>{score}</strong> / {blanks.length}
-          </span>
-        )}
-        {revealed && (
-          <span className="ml-2 self-center text-sm italic text-neutral-600">Answers revealed</span>
-        )}
+          {checked && (
+            <span className="ml-2 self-center text-sm text-neutral-700">
+              Score: <strong>{score}</strong> / {blanks.length}
+            </span>
+          )}
+          {revealed && (
+            <span className="ml-2 self-center text-sm italic text-neutral-600">
+              Answers revealed
+            </span>
+          )}
+        </div>
+
+        {/* Right: mode toggle */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setMode('typed')}
+            className={`px-3 py-1 rounded-full text-sm shadow-sm ${
+              mode === 'typed'
+                ? 'bg-indigo-500 text-white'
+                : 'bg-white text-neutral-700 hover:bg-neutral-100'
+            }`}
+          >
+            ✏️ Typed
+          </button>
+          <button
+            onClick={() => setMode('dropdown')}
+            className={`px-3 py-1 rounded-full text-sm shadow-sm ${
+              mode === 'dropdown'
+                ? 'bg-indigo-500 text-white'
+                : 'bg-white text-neutral-700 hover:bg-neutral-100'
+            }`}
+          >
+            🔽 Dropdown
+          </button>
+        </div>
       </div>
     </div>
   );
