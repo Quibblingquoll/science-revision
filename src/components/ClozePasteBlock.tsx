@@ -12,48 +12,14 @@ type ClozeValue = {
   caseSensitive?: boolean;
 };
 
-type Part = { type: 'text'; value: string } | { type: 'blank'; answer: string; idx: number };
+type Part =
+  | { type: 'text'; value: string }
+  | { type: 'blank'; answer: string; idx: number };
 
 const STOPWORDS = new Set([
-  'a',
-  'an',
-  'and',
-  'are',
-  'as',
-  'at',
-  'be',
-  'but',
-  'by',
-  'for',
-  'from',
-  'has',
-  'have',
-  'in',
-  'is',
-  'it',
-  'its',
-  'of',
-  'on',
-  'or',
-  'that',
-  'the',
-  'to',
-  'was',
-  'were',
-  'with',
-  'this',
-  'these',
-  'those',
-  'we',
-  'you',
-  'they',
-  'our',
-  'your',
-  'their',
-  'he',
-  'she',
-  'his',
-  'her',
+  'a','an','and','are','as','at','be','but','by','for','from','has','have','in','is','it','its',
+  'of','on','or','that','the','to','was','were','with','this','these','those','we','you','they',
+  'our','your','their','he','she','his','her',
 ]);
 
 const isWord = (t: string) => /^\p{L}[\p{L}\p{M}'-]*$/u.test(t);
@@ -73,9 +39,7 @@ const shuffle = <T,>(arr: T[]) => {
 function splitWithBrackets(text: string): Part[] {
   const out: Part[] = [];
   const re = /\[([^\]]+)\]/g;
-  let last = 0,
-    m: RegExpExecArray | null,
-    idx = 0;
+  let last = 0, m: RegExpExecArray | null, idx = 0;
   while ((m = re.exec(text))) {
     if (m.index > last) out.push({ type: 'text', value: text.slice(last, m.index) });
     out.push({ type: 'blank', answer: m[1].trim(), idx: idx++ });
@@ -86,9 +50,9 @@ function splitWithBrackets(text: string): Part[] {
 }
 
 function autoBlank(text: string, target = 12, minLen = 5): Part[] {
-  const tokens = Array.from(text.matchAll(/(\p{L}[\p{L}\p{M}'-]*|\s+|[^\s\p{L}\p{M}])/gu)).map(
-    (t) => t[0]
-  );
+  const tokens = Array.from(
+    text.matchAll(/(\p{L}[\p{L}\p{M}'-]*|\s+|[^\s\p{L}\p{M}])/gu)
+  ).map((t) => t[0]);
 
   const wordIdxs: number[] = [];
   const seen = new Set<string>();
@@ -157,17 +121,17 @@ function InlineDropdown({
         type="button"
         onClick={() => setOpen((o) => !o)}
         className={[
-          'border-b border-neutral-300 focus:outline-none text-base transition select-none',
-          'hover:border-neutral-400',
+          "border-b border-neutral-300 focus:outline-none text-base transition select-none",
+          "hover:border-neutral-400",
           correct
-            ? 'text-green-700 border-green-400 font-semibold'
+            ? "text-green-700 border-green-400 font-semibold"
             : checked && value
-              ? 'text-red-700 border-red-400'
-              : 'text-neutral-800',
+            ? "text-red-700 border-red-400"
+            : "text-neutral-800",
           !value
             ? "text-transparent after:content-['_'] after:text-neutral-400 after:align-baseline"
-            : '',
-        ].join(' ')}
+            : "",
+        ].join(" ")}
         style={{ minWidth: `${chWidth * 0.62}em` }}
       >
         {value || '\u00A0'}
@@ -262,10 +226,7 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
     ? blanks.reduce((acc, b) => acc + (norm(selected[b.idx]) === norm(b.answer) ? 1 : 0), 0)
     : 0;
 
-  const onCheck = () => {
-    setChecked(true);
-    setRevealed(false);
-  };
+  const onCheck = () => { setChecked(true); setRevealed(false); };
   const onReveal = () => {
     setSelected(blanks.map((b) => b.answer));
     const m = new Map<string, number>();
@@ -291,13 +252,13 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
         value={selected[p.idx] || ''}
         onChange={(e) => onSelect(p.idx, e.target.value)}
         className={[
-          'mx-1 bg-transparent border-b focus:outline-none text-neutral-800 px-1 align-baseline transition-all',
+          "mx-1 bg-transparent border-b focus:outline-none text-neutral-800 px-1 align-baseline transition-all",
           correct
-            ? 'border-green-500 text-green-700 font-semibold'
+            ? "border-green-500 text-green-700 font-semibold"
             : checked && selected[p.idx]
-              ? 'border-red-500 text-red-700'
-              : 'border-neutral-300 focus:border-indigo-400',
-        ].join(' ')}
+            ? "border-red-500 text-red-700"
+            : "border-neutral-300 focus:border-indigo-400",
+        ].join(" ")}
         style={{ width: `${chWidth * 0.62}em` }}
       />
     );
@@ -348,34 +309,33 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
       </div>
 
       {/* Word Bank */}
-      <div className="bg-indigo-50/80 rounded-xl p-3 mb-4 border border-indigo-100 shadow-inner">
-        <h4 className="text-sm font-semibold text-indigo-700 mb-2">Word Bank</h4>
-        <div className="flex flex-wrap gap-2">
-          {wordBank.map(({ word, remaining }) => (
+      <div className="bg-indigo-50/60 rounded-xl p-3 mb-4 border border-indigo-100 shadow-inner">
+        <h4 className="text-sm font-semibold text-indigo-700 mb-1">Word Bank</h4>
+        <p className="leading-relaxed text-base text-neutral-700">
+          {wordBank.map(({ word, remaining }, i) => (
             <span
               key={word}
-              className={`px-2 py-1 rounded-md text-sm ${
+              className={`mr-3 ${
                 remaining > 0
-                  ? 'bg-white border border-indigo-200 text-neutral-800 shadow-sm'
-                  : 'bg-neutral-100 text-neutral-400 line-through'
+                  ? 'text-neutral-800'
+                  : 'text-neutral-400 line-through'
               }`}
             >
               {word}
+              {i < wordBank.length - 1 ? ',' : ''}
             </span>
           ))}
-        </div>
+        </p>
       </div>
 
       {/* Cloze content */}
       <div className="bg-white/90 rounded-xl p-5 shadow-inner leading-relaxed text-neutral-800">
         {parts.map((p, i) =>
-          p.type === 'text' ? (
-            <span key={i}>{p.value}</span>
-          ) : mode === 'typed' ? (
-            renderBlankTyped(p)
-          ) : (
-            renderBlankDropdown(p)
-          )
+          p.type === 'text'
+            ? <span key={i}>{p.value}</span>
+            : mode === 'typed'
+              ? renderBlankTyped(p)
+              : renderBlankDropdown(p)
         )}
       </div>
 
@@ -406,7 +366,9 @@ export default function ClozePasteBlock({ value }: { value: ClozeValue }) {
           </span>
         )}
         {revealed && (
-          <span className="ml-2 self-center text-sm italic text-neutral-600">Answers revealed</span>
+          <span className="ml-2 self-center text-sm italic text-neutral-600">
+            Answers revealed
+          </span>
         )}
       </div>
     </div>
